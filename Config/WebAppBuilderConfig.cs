@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace MiniMazErpBack;
 
@@ -16,7 +15,6 @@ public class WebAppBuilderConfig
         // builder.Services.AddScoped<TokenService>();
         // TODO: map and register Mapster DI
         builder.Services.AddControllers();
-
     }
 
     public static void ConfigureCorsPolicy(WebApplicationBuilder builder)
