@@ -18,11 +18,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         /*
         CONFIGURACIÓN PARA PRODUCT:
         - Precisión decimal para SellPrice: Define el formato de almacenamiento para precios
-          (18 dígitos totales, 2 decimales) para evitar errores de redondeo
+          (18 dígitos totales, 4 decimales) para evitar errores de redondeo
         */
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.Property(e => e.SellPrice).HasPrecision(18, 2);
+            entity.Property(e => e.SellPrice).HasPrecision(18, 4);
         });
 
         /*
