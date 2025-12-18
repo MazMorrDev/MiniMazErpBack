@@ -4,12 +4,14 @@ namespace MiniMazErpBack;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    DbSet<Buy> Buys { get; set; }
-    DbSet<Inventory> Inventories { get; set; }
-    DbSet<Movement> Movements { get; set; }
-    DbSet<Product> Products { get; set; }
-    DbSet<Sell> Sells { get; set; }
-    DbSet<Warehouse> Warehouses { get; set; }
+    public DbSet<Buy> Buys { get; set; }
+    public DbSet<Inventory> Inventories { get; set; }
+    public DbSet<Movement> Movements { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Sell> Sells { get; set; }
+    public DbSet<Warehouse> Warehouses { get; set; }
+    public DbSet<Expense> Expenses { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,12 +41,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(i => i.Warehouse)
                 .WithMany()
                 .HasForeignKey(i => i.WarehouseId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(i => i.Product)
                 .WithMany(p => p.Inventories)
                 .HasForeignKey(i => i.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(e => new { e.WarehouseId, e.ProductId }).IsUnique();
 
@@ -64,12 +66,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(m => m.Warehouse)
                 .WithMany()
                 .HasForeignKey(m => m.WarehouseId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(m => m.Product)
                 .WithMany(p => p.Movements)
                 .HasForeignKey(m => m.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.Property(e => e.MovementDate).HasDefaultValueSql("GETUTCDATE()");
 
