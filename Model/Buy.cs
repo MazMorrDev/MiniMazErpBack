@@ -7,6 +7,13 @@ namespace MiniMazErpBack;
 [Table("Buy")]
 public class Buy
 {
-    [Key]
-    public int id;
+    [Key, Column("movement_id")]
+    public int MovementId { get; set; }
+
+    [Column("unit_price")]
+    public decimal UnitPrice { get; set; }
+
+    // Navigation Property
+    [ForeignKey("MovementId")]
+    public required virtual Movement Movement { get; set; }
 }
