@@ -11,9 +11,6 @@ Migrations/*
 # Environment file
 .env
 
-# Private Documentation
-Documentación Workflow.md
-
 # Common node modules locations
 /node_modules
 /wwwroot/node_modules
@@ -59,4 +56,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# VSCode Settings
 .vscode
