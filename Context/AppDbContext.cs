@@ -12,81 +12,95 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Warehouse> Warehouses { get; set; }
     public DbSet<Expense> Expenses { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        /*
-        CONFIGURACIÓN PARA PRODUCT:
-        - Precisión decimal para SellPrice: Define el formato de almacenamiento para precios
-          (18 dígitos totales, 4 decimales) para evitar errores de redondeo
-        */
+        // PRODUCT - Configuración de producto
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.Property(e => e.SellPrice).HasPrecision(18, 4);
+            // Precisión decimal para precio de venta: 18 dígitos totales (14 enteros + 4 decimales)
+            // Esto evita errores de redondeo en cálculos financieros
+            entity.Property(e => e.SellPrice)
+                .HasPrecision(18, 4);
         });
 
-        /*
-        CONFIGURACIÓN PARA INVENTORY:
-        - Relación con Warehouse y Product: Cada registro de inventario vincula un producto 
-          con un warehouse específico
-        - Índice único compuesto: Evita registros duplicados de inventario para la misma
-          combinación warehouse-producto
-        - Check constraint: Garantiza que el stock nunca sea negativo
-        - Eliminación en cascada: Si se elimina un producto o warehouse, se eliminan sus registros de inventario
-        */
+        // INVENTORY - Configuración de inventario
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasOne(i => i.Warehouse)
-                .WithMany()
-                .HasForeignKey(i => i.WarehouseId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Índice único compuesto: Evita tener múltiples registros para la misma combinación
+            // de almacén y producto. Un producto solo puede tener un registro de inventario por almacén
+            entity.HasIndex(e => new { e.WarehouseId, e.ProductId })
+                .IsUnique();
 
-            entity.HasOne(i => i.Product)
-                .WithMany(p => p.Inventories)
-                .HasForeignKey(i => i.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasIndex(e => new { e.WarehouseId, e.ProductId }).IsUnique();
-
-            entity.ToTable(t => t.HasCheckConstraint("CK_Inventory_Stock", "[Stock] >= 0"));
+            // Check constraint a nivel de tabla: Garantiza que el stock nunca sea negativo
+            // Se ejecuta en la base de datos, previniendo datos inválidos incluso desde SQL directo
+            entity.ToTable(t => t.HasCheckConstraint("CK_Inventory_Stock", "stock >= 0"));
         });
 
-        /*
-        CONFIGURACIÓN PARA MOVEMENT:
-        - Relaciones con Client, Warehouse y Product: Registra movimientos vinculados a estas entidades
-        - Precisión decimal para UnitaryCost: Formato consistente para costos unitarios
-        - Valor por defecto en MovementDate: Fecha UTC actual al crear un movimiento
-        - Check constraint: Asegura que la cantidad de movimiento sea siempre positiva
-        - Eliminación en cascada: Mantiene la integridad referencial al eliminar entidades relacionadas
-        */
+        // MOVEMENT - Configuración de movimiento
         modelBuilder.Entity<Movement>(entity =>
         {
-            entity.HasOne(m => m.Warehouse)
-                .WithMany()
-                .HasForeignKey(m => m.WarehouseId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Valor por defecto para fecha de movimiento: Usa la fecha/hora actual del servidor PostgreSQL
+            // Asegura que todos los movimientos tengan fecha incluso si no se especifica
+            entity.Property(e => e.MovementDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            entity.HasOne(m => m.Product)
-                .WithMany(p => p.Movements)
-                .HasForeignKey(m => m.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Check constraint: La cantidad de movimiento debe ser siempre positiva (entrada o salida)
+            // Cantidad = 0 no tiene sentido en un movimiento
+            entity.ToTable(t => t.HasCheckConstraint("CK_Movement_Quantity", "quantity > 0"));
 
-            entity.Property(e => e.MovementDate).HasDefaultValueSql("GETUTCDATE()");
+            // Índice para consultas por fecha: Acelera búsquedas de movimientos en rangos de fechas
+            // Ej: "Movimientos del último mes", "Reporte mensual"
+            entity.HasIndex(e => e.MovementDate);
 
-            entity.ToTable(t => t.HasCheckConstraint("CK_Movement_Quantity", "[Quantity] > 0"));
+            // Índice para consultas por producto: Optimiza búsquedas del historial de un producto específico
+            entity.HasIndex(e => e.ProductId);
         });
 
-        /*
-        CONFIGURACIÓN DE ENUMS:
-        - Conversión a string: Almacena los valores de enum como cadenas legibles en la BD
-        - Longitud máxima: Limita el tamaño de almacenamiento para los campos de enum
-        - Esto mejora la legibilidad de la base de datos y facilita consultas directas
-        */
-        modelBuilder.Entity<Expense>()
-            .Property(e => e.ExpenseType)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+        // SELL - Configuración de venta
+        modelBuilder.Entity<Sell>(entity =>
+        {
+            // Precisión para porcentaje de descuento: 5 dígitos totales (3 enteros + 2 decimales)
+            // Permite descuentos como 12.5%, 25.75%, 100.00%
+            entity.Property(e => e.DiscountPercentage)
+                .HasPrecision(5, 2);
+
+            // Check constraint: El descuento debe estar entre 0% y 100%
+            // Previene descuentos negativos o mayores al 100%
+            entity.ToTable(t => t.HasCheckConstraint("CK_Sell_Discount",
+                "discount_percentage >= 0 AND discount_percentage <= 100"));
+        });
+
+        // BUY - Configuración de compra
+        modelBuilder.Entity<Buy>(entity =>
+        {
+            // Misma precisión que Product.SellPrice para consistencia en precios
+            entity.Property(e => e.UnitPrice)
+                .HasPrecision(18, 4);
+        });
+
+        // EXPENSE - Configuración de gasto
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            // Precisión consistente con otros valores monetarios
+            entity.Property(e => e.TotalPrice)
+                .HasPrecision(18, 4);
+
+            // Convertir enum a string para almacenamiento en BD
+            // HasMaxLength(20) limita el tamaño y mejora performance de índices
+            entity.Property(e => e.ExpenseType)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+        });
+
+        // WAREHOUSE - Configuración de almacén
+        modelBuilder.Entity<Warehouse>(entity =>
+        {
+            // Índice único: Evita nombres de almacenes duplicados
+            // Mejora integridad de datos y búsquedas por nombre
+            entity.HasIndex(e => e.Name)
+                .IsUnique();
+        });
     }
 }
