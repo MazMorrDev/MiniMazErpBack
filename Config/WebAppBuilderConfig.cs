@@ -10,10 +10,7 @@ public class WebAppBuilderConfig
         // Add services to the container.
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi("v1"); // Customize the document name
-        // builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
-        // builder.Services.AddScoped<UserService>();
-        // builder.Services.AddScoped<TokenService>();
-        // TODO: map and register Mapster DI
+        builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
         builder.Services.AddControllers();
     }
 
