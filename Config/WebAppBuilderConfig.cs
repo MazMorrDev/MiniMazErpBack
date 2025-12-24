@@ -16,7 +16,7 @@ public class WebAppBuilderConfig
 
     public static void ConfigureCorsPolicy(WebApplicationBuilder builder)
     {
-        // Configure CORS
+        // Configure CORS to local development
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowSpecificOrigin", policy =>
