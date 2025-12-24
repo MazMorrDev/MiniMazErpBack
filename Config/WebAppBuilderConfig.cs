@@ -10,7 +10,7 @@ public class WebAppBuilderConfig
         // Add services to the container.
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi("v1"); // Customize the document name
-        builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
+        // builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
         builder.Services.AddControllers();
     }
 
