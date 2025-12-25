@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class BuyService
+public class BuyService : IBuyService
 {
 
 }

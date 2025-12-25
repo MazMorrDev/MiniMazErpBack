@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class WarehouseService
+public class WarehouseService : IWarehouseService
 {
 
 }

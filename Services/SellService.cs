@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class SellService
+public class SellService : ISellService
 {
 
 }

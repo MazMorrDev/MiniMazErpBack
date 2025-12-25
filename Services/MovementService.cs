@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class MovementService
+public class MovementService : IMovementService
 {
 
 }

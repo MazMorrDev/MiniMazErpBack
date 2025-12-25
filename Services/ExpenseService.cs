@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class ExpenseService
+public class ExpenseService : IExpenseService
 {
 
 }

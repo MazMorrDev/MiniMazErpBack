@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class InventoryService
+public class InventoryService : IInventoryService
 {
 
 }
