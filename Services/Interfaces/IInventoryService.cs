@@ -2,9 +2,9 @@
 
 public interface IInventoryService
 {
-    Task<Inventory> CreateInventoryAsync(Inventory inventory);
+    Task<Inventory> CreateInventoryAsync(CreateInventoryDto inventoryDto);
     Task<bool> DeleteInventoryAsync(int id);
     Task<IEnumerable<Inventory>> GetAllInventoriesAsync();
     Task<Inventory?> GetInventoryByIdAsync(int id);
-    Task<bool> UpdateInventoryAsync(Inventory inventory);
+    Task<bool> UpdateInventoryAsync(UpdateInventoryDto inventoryDto);
 }

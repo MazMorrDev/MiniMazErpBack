@@ -1,29 +1,90 @@
-﻿namespace MiniMazErpBack;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-public class InventoryService : IInventoryService
+namespace MiniMazErpBack;
+
+public class InventoryService(InventoryRepository repo) : IInventoryService
 {
-    public Task<Inventory> CreateInventoryAsync(Inventory inventory)
+    private readonly InventoryRepository _repo = repo;
+
+    public async Task<Inventory> CreateInventoryAsync(CreateInventoryDto inventoryDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var inventory = new Inventory()
+            {
+                WarehouseId = inventoryDto.WarehouseId,
+                ProductId = inventoryDto.ProductId,
+                Stock = inventoryDto.Stock,
+                AlertStock = inventoryDto.AlertStock,
+                WarningStock = inventoryDto.WarningStock
+            };
+            await _repo.CreateAsync(inventory);
+
+            return inventory;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<bool> DeleteInventoryAsync(int id)
+    public async Task<bool> DeleteInventoryAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var inventory = _repo.GetByIdAsync(id);
+            ArgumentNullException.ThrowIfNull(inventory);
+            await _repo.DeleteAsync(id);
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<IEnumerable<Inventory>> GetAllInventoriesAsync()
+    public async Task<IEnumerable<Inventory>> GetAllInventoriesAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _repo.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<Inventory?> GetInventoryByIdAsync(int id)
+    public async Task<Inventory?> GetInventoryByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _repo.GetByIdAsync(id);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<bool> UpdateInventoryAsync(Inventory inventory)
+    public async Task<bool> UpdateInventoryAsync(UpdateInventoryDto inventoryDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var inventory = new Inventory()
+            {
+                WarehouseId = inventoryDto.WarehouseId,
+                ProductId = inventoryDto.ProductId,
+                Stock = inventoryDto.Stock,
+                AlertStock = inventoryDto.AlertStock,
+                WarningStock = inventoryDto.WarningStock
+            };
+            await _repo.UpdateAsync(inventory);
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
