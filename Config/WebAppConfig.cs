@@ -18,5 +18,4 @@ public class WebAppConfig
         app.MapControllers();
         app.Run();
     }
-
 }
