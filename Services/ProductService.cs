@@ -1,29 +1,88 @@
 ﻿namespace MiniMazErpBack;
 
-public class ProductService : IProductService
+public class ProductService(ProductRepository repo) : IProductService
 {
-    public Task<Product> CreateProductAsync(Product product)
+    private readonly ProductRepository _repo = repo;
+    public async Task<Product> CreateProductAsync(CreateProductDto productDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            ArgumentNullException.ThrowIfNull(productDto);
+            
+            var product = new Product()
+            {
+                Name = productDto.Name,
+                SellPrice = productDto.SellPrice
+            };
+
+            await _repo.CreateAsync(product);
+            return product;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<bool> DeleteProductAsync(int id)
+    public async Task<bool> DeleteProductAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var product = await _repo.GetByIdAsync(id);
+            ArgumentNullException.ThrowIfNull(product);
+
+            await _repo.DeleteAsync(id);
+
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<IEnumerable<Product>> GetAllProductsAsync()
+    public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _repo.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<Product?> GetProductByIdAsync(int id)
+    public async Task<Product?> GetProductByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _repo.GetByIdAsync(id);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<bool> UpdateProductAsync(Product product)
+    public async Task<bool> UpdateProductAsync(UpdateProductDto productDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            ArgumentNullException.ThrowIfNull(productDto);
+
+            var product = new Product()
+            {
+                Name = productDto.Name,
+                SellPrice = productDto.SellPrice
+            };
+
+            await _repo.UpdateAsync(product);
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }

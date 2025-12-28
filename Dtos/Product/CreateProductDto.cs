@@ -2,10 +2,10 @@
 
 namespace MiniMazErpBack;
 
-public record class UpdateProductDto
+public record class CreateProductDto
 {
     [Required, MaxLength(40)]
-    public required string Name { get; init; } 
+    public required string Name { get; init; }
 
     public decimal? SellPrice { get; init; }
 }

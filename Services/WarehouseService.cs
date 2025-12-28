@@ -42,8 +42,7 @@ public class WarehouseService(WarehouseRepository repo) : IWarehouseService
     {
         try
         {
-            var warehouses = await _repo.GetAllAsync();
-            return warehouses.ToList();
+            return await _repo.GetAllAsync();
         }
         catch (Exception)
         {
