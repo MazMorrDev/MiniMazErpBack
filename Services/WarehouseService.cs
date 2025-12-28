@@ -1,29 +1,83 @@
 ﻿namespace MiniMazErpBack;
 
-public class WarehouseService : IWarehouseService
+public class WarehouseService(WarehouseRepository repo) : IWarehouseService
 {
-    public Task<Warehouse> CreateWarehouseAsync(Warehouse warehouse)
+    private readonly WarehouseRepository _repo = repo;
+    public async Task<Warehouse> CreateWarehouseAsync(CreateWarehouseDto warehouseDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var warehouse = new Warehouse()
+            {
+                Name = warehouseDto.Name,
+                Description = warehouseDto.Description
+            };
+            await _repo.CreateAsync(warehouse);
+
+            return warehouse;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<bool> DeleteWarehouseAsync(int id)
+    public async Task<bool> DeleteWarehouseAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var warehouse = await _repo.GetByIdAsync(id);
+            ArgumentNullException.ThrowIfNull(warehouse);
+            await _repo.DeleteAsync(id);
+
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<IEnumerable<Warehouse>> GetAllWarehousesAsync()
+    public async Task<IEnumerable<Warehouse>> GetAllWarehousesAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var warehouses = await _repo.GetAllAsync();
+            return warehouses.ToList();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<Warehouse?> GetWarehouseByIdAsync(int id)
+    public async Task<Warehouse?> GetWarehouseByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return await _repo.GetByIdAsync(id);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Task<bool> UpdateWarehouseAsync(Warehouse warehouse)
+    public async Task<bool> UpdateWarehouseAsync(UpdateWarehouseDto warehouseDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var warehouse = new Warehouse()
+            {
+                Name = warehouseDto.Name,
+                Description = warehouseDto.Description
+            };
+            await _repo.UpdateAsync(warehouse);
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
