@@ -17,7 +17,7 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
             VALUES (@movement_id, @sale_price, @discount_percentage)
             RETURNING movement_id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@movement_id", sell.MovementId));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@sale_price", sell.SalePrice));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@discount_percentage", sell.DiscountPercentage));
@@ -35,7 +35,7 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
             DELETE FROM "Sell" 
             WHERE movement_id = @movement_id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@movement_id", id));
 
         return await command.ExecuteNonQueryAsync() > 0;
@@ -79,11 +79,11 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
             INNER JOIN "Movement" m ON s.movement_id = m.id
             WHERE s.movement_id = @movement_id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@movement_id", id));
 
         using var reader = await command.ExecuteReaderAsync();
-        
+
         if (await reader.ReadAsync())
         {
             return MapToSell(reader);
@@ -104,7 +104,7 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
                 discount_percentage = @discount_percentage
             WHERE movement_id = @movement_id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@sale_price", sell.SalePrice));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@discount_percentage", sell.DiscountPercentage));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@movement_id", sell.MovementId));
@@ -115,7 +115,7 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
     private static Sell MapToSell(DbDataReader reader)
     {
         var movementId = reader.GetInt32(reader.GetOrdinal("movement_id"));
-        
+
         return new Sell
         {
             MovementId = movementId,
@@ -126,8 +126,8 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
                 Id = movementId,
                 WarehouseId = reader.GetInt32(reader.GetOrdinal("warehouse_id")),
                 ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
-                Description = reader.IsDBNull(reader.GetOrdinal("description")) 
-                    ? null 
+                Description = reader.IsDBNull(reader.GetOrdinal("description"))
+                    ? null
                     : reader.GetString(reader.GetOrdinal("description")),
                 Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
                 MovementDate = reader.GetDateTime(reader.GetOrdinal("movement_date"))
@@ -150,7 +150,7 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
             WHERE m.product_id = @product_id
             ORDER BY m.movement_date DESC;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@product_id", productId));
 
         using var reader = await command.ExecuteReaderAsync();
@@ -179,7 +179,7 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
             WHERE m.movement_date >= @start_date AND m.movement_date <= @end_date
             ORDER BY m.movement_date DESC;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@start_date", startDate));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@end_date", endDate));
 
@@ -192,5 +192,24 @@ public class SellRepository(Func<DbConnection> factory) : ISellRepository
         }
 
         return result;
+    }
+
+    // Agregar este método a SellRepository
+    public async Task<bool> ExistsAsync(int id)
+    {
+        using var connection = _connectionFactory();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+        SELECT COUNT(1) 
+        FROM "Sell" 
+        WHERE movement_id = @movement_id;
+        """;
+
+        command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@movement_id", id));
+
+        var result = await command.ExecuteScalarAsync();
+        return Convert.ToInt32(result) > 0;
     }
 }

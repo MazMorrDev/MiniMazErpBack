@@ -1,29 +1,97 @@
 ﻿namespace MiniMazErpBack;
 
-public class BuyService : IBuyService
+public class BuyService(BuyRepository buyRepo, MovementRepository movementRepo) : IBuyService
 {
-    public Task<Buy> CreateBuyAsync(Buy buy)
+    private readonly BuyRepository _buyRepo = buyRepo;
+    private readonly MovementRepository _movementRepo = movementRepo;
+
+    public async Task<Buy> CreateBuyAsync(Buy buy)
     {
-        throw new NotImplementedException();
+        // Validar que el objeto Buy tiene un Movement válido
+        if (buy.Movement == null)
+            throw new ArgumentException("El objeto Buy debe tener un Movement asociado");
+
+        // Primero crear el Movement
+        var movementId = await _movementRepo.CreateAsync(buy.Movement);
+
+        // Asignar el ID al Buy y crear el registro específico
+        buy.MovementId = movementId;
+        buy.Movement.Id = movementId;
+
+        await _buyRepo.CreateAsync(buy);
+        return buy;
     }
 
-    public Task<bool> DeleteBuyAsync(int id)
+    public async Task<bool> DeleteBuyAsync(int id)
     {
-        throw new NotImplementedException();
+        // Solo elimina de Buy, Movement se mantiene (o puedes implementar cascada si es necesario)
+        return await _buyRepo.DeleteAsync(id);
     }
 
-    public Task<IEnumerable<Buy>> GetAllBuysAsync()
+    public async Task<IEnumerable<Buy>> GetAllBuysAsync()
     {
-        throw new NotImplementedException();
+        return await _buyRepo.GetAllAsync();
     }
 
-    public Task<Buy?> GetBuyByIdAsync(int id)
+    public async Task<Buy?> GetBuyByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _buyRepo.GetByIdAsync(id);
     }
 
-    public Task<bool> UpdateBuyAsync(Buy buy)
+    public async Task<bool> UpdateBuyAsync(Buy buy)
     {
-        throw new NotImplementedException();
+        // Primero actualizar el Movement si es necesario
+        if (buy.Movement != null)
+        {
+            await _movementRepo.UpdateAsync(buy.Movement);
+        }
+
+        // Luego actualizar el Buy
+        return await _buyRepo.UpdateAsync(buy);
+    }
+
+    // Método adicional: Obtener Buy completo con Movement cargado
+    public async Task<Buy?> GetFullBuyByIdAsync(int id)
+    {
+        var buy = await _buyRepo.GetByIdAsync(id);
+        if (buy == null) return null;
+
+        // Cargar el Movement completo
+        var movement = await _movementRepo.GetByIdAsync(id);
+        if (movement != null)
+        {
+            buy.Movement = movement;
+        }
+
+        return buy;
+    }
+
+    // NUEVO: Método para eliminar completamente (Buy + Movement)
+    public async Task<bool> DeleteBuyAndMovementAsync(int id)
+    {
+        // Eliminar Buy primero
+        var buyDeleted = await _buyRepo.DeleteAsync(id);
+        if (!buyDeleted) return false;
+
+        // Luego eliminar Movement
+        return await _movementRepo.DeleteAsync(id);
+    }
+
+    // NUEVO: Método para verificar si existe una compra
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _buyRepo.ExistsAsync(id);
+    }
+
+    // NUEVO: Método para obtener compras por producto
+    public async Task<IEnumerable<Buy>> GetBuysByProductIdAsync(int productId)
+    {
+        return await _buyRepo.GetByProductIdAsync(productId);
+    }
+
+    // NUEVO: Método para obtener compras por rango de fechas
+    public async Task<IEnumerable<Buy>> GetBuysByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
+    {
+        return await _buyRepo.GetByDateRangeAsync(startDate, endDate);
     }
 }

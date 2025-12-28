@@ -17,7 +17,7 @@ public class MovementRepository(Func<DbConnection> factory) : IMovementRepositor
             VALUES (@warehouse_id, @product_id, @description, @quantity, @movement_date)
             RETURNING id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@warehouse_id", movement.WarehouseId));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@product_id", movement.ProductId));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@description", movement.Description));
@@ -37,7 +37,7 @@ public class MovementRepository(Func<DbConnection> factory) : IMovementRepositor
             DELETE FROM "Movement" 
             WHERE id = @id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@id", id));
 
         return await command.ExecuteNonQueryAsync() > 0;
@@ -77,11 +77,11 @@ public class MovementRepository(Func<DbConnection> factory) : IMovementRepositor
             FROM "Movement"
             WHERE id = @id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@id", id));
 
         using var reader = await command.ExecuteReaderAsync();
-        
+
         if (await reader.ReadAsync())
         {
             return MapToMovement(reader);
@@ -105,7 +105,7 @@ public class MovementRepository(Func<DbConnection> factory) : IMovementRepositor
                 movement_date = @movement_date
             WHERE id = @id;
             """;
-        
+
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@warehouse_id", movement.WarehouseId));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@product_id", movement.ProductId));
         command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@description", movement.Description));
@@ -116,6 +116,100 @@ public class MovementRepository(Func<DbConnection> factory) : IMovementRepositor
         return await command.ExecuteNonQueryAsync() > 0;
     }
 
+    // Nuevo método: Verificar si existen registros hijos
+    public async Task<bool> HasRelatedRecordsAsync(int id)
+    {
+        using var connection = _connectionFactory();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT 
+                (SELECT COUNT(1) FROM "Buy" WHERE movement_id = @id) +
+                (SELECT COUNT(1) FROM "Sell" WHERE movement_id = @id) +
+                (SELECT COUNT(1) FROM "Expense" WHERE movement_id = @id) as total_count;
+            """;
+
+        command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@id", id));
+
+        var result = await command.ExecuteScalarAsync();
+        return Convert.ToInt32(result) > 0;
+    }
+
+    // Nuevo método: Verificar si el movimiento existe
+    public async Task<bool> ExistsAsync(int id)
+    {
+        using var connection = _connectionFactory();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT COUNT(1) 
+            FROM "Movement" 
+            WHERE id = @id;
+            """;
+
+        command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@id", id));
+
+        var result = await command.ExecuteScalarAsync();
+        return Convert.ToInt32(result) > 0;
+    }
+
+    // Nuevo método: Obtener movimientos por producto
+    public async Task<IEnumerable<Movement>> GetByProductIdAsync(int productId)
+    {
+        using var connection = _connectionFactory();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT id, warehouse_id, product_id, description, quantity, movement_date
+            FROM "Movement"
+            WHERE product_id = @product_id
+            ORDER BY movement_date DESC;
+            """;
+
+        command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@product_id", productId));
+
+        using var reader = await command.ExecuteReaderAsync();
+        var result = new List<Movement>();
+
+        while (await reader.ReadAsync())
+        {
+            result.Add(MapToMovement(reader));
+        }
+
+        return result;
+    }
+
+    // Nuevo método: Obtener movimientos por rango de fechas
+    public async Task<IEnumerable<Movement>> GetByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
+    {
+        using var connection = _connectionFactory();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT id, warehouse_id, product_id, description, quantity, movement_date
+            FROM "Movement"
+            WHERE movement_date >= @start_date AND movement_date <= @end_date
+            ORDER BY movement_date DESC;
+            """;
+
+        command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@start_date", startDate));
+        command.Parameters.Add(DbParameterHelper.CreateParameter(command, "@end_date", endDate));
+
+        using var reader = await command.ExecuteReaderAsync();
+        var result = new List<Movement>();
+
+        while (await reader.ReadAsync())
+        {
+            result.Add(MapToMovement(reader));
+        }
+
+        return result;
+    }
+
     private static Movement MapToMovement(DbDataReader reader)
     {
         return new Movement
@@ -123,8 +217,8 @@ public class MovementRepository(Func<DbConnection> factory) : IMovementRepositor
             Id = reader.GetInt32(reader.GetOrdinal("id")),
             WarehouseId = reader.GetInt32(reader.GetOrdinal("warehouse_id")),
             ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
-            Description = reader.IsDBNull(reader.GetOrdinal("description")) 
-                ? null 
+            Description = reader.IsDBNull(reader.GetOrdinal("description"))
+                ? null
                 : reader.GetString(reader.GetOrdinal("description")),
             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
             MovementDate = reader.GetDateTime(reader.GetOrdinal("movement_date"))
