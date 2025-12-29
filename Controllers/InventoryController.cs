@@ -1,6 +1,8 @@
-﻿namespace MiniMazErpBack;
+﻿using Microsoft.AspNetCore.Mvc;
 
-public class InventoryController
+namespace MiniMazErpBack;
+
+public class InventoryController(InventoryService service) : ControllerBase
 {
-
+    private readonly IInventoryService _service = service;
 }

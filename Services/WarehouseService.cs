@@ -1,19 +1,26 @@
-﻿namespace MiniMazErpBack;
+﻿using Microsoft.EntityFrameworkCore;
 
-public class WarehouseService(WarehouseRepository repo) : IWarehouseService
+namespace MiniMazErpBack;
+
+public class WarehouseService(AppDbContext context) : IWarehouseService
 {
-    private readonly WarehouseRepository _repo = repo;
+    private readonly AppDbContext _context = context;
     public async Task<Warehouse> CreateWarehouseAsync(CreateWarehouseDto warehouseDto)
     {
         try
         {
+            var client = await _context.Clients.FindAsync(warehouseDto.ClientId);
+            ArgumentNullException.ThrowIfNull(client);
+
             var warehouse = new Warehouse()
             {
+                ClientId = warehouseDto.ClientId,
                 Name = warehouseDto.Name,
-                Description = warehouseDto.Description
+                Description = warehouseDto.Description,
+                Client = client
             };
-            await _repo.CreateAsync(warehouse);
-
+            await _context.Warehouses.AddAsync(warehouse);
+            await _context.SaveChangesAsync();
             return warehouse;
         }
         catch (Exception)
@@ -26,10 +33,11 @@ public class WarehouseService(WarehouseRepository repo) : IWarehouseService
     {
         try
         {
-            var warehouse = await _repo.GetByIdAsync(id);
+            var warehouse = await _context.Warehouses.FindAsync(id);
             ArgumentNullException.ThrowIfNull(warehouse);
-            await _repo.DeleteAsync(id);
 
+            _context.Warehouses.Remove(warehouse);
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception)
@@ -42,7 +50,7 @@ public class WarehouseService(WarehouseRepository repo) : IWarehouseService
     {
         try
         {
-            return await _repo.GetAllAsync();
+            return await _context.Warehouses.ToListAsync();
         }
         catch (Exception)
         {
@@ -54,7 +62,7 @@ public class WarehouseService(WarehouseRepository repo) : IWarehouseService
     {
         try
         {
-            return await _repo.GetByIdAsync(id);
+            return await _context.Warehouses.FindAsync(id);
         }
         catch (Exception)
         {
@@ -62,16 +70,17 @@ public class WarehouseService(WarehouseRepository repo) : IWarehouseService
         }
     }
 
-    public async Task<bool> UpdateWarehouseAsync(UpdateWarehouseDto warehouseDto)
+    public async Task<bool> UpdateWarehouseAsync(int id, UpdateWarehouseDto warehouseDto)
     {
         try
         {
-            var warehouse = new Warehouse()
-            {
-                Name = warehouseDto.Name,
-                Description = warehouseDto.Description
-            };
-            await _repo.UpdateAsync(warehouse);
+            var warehouse = await _context.Warehouses.FindAsync(id);
+            ArgumentNullException.ThrowIfNull(warehouse);
+
+            warehouse.Name = warehouseDto.Name;
+            warehouse.Description = warehouseDto.Description;
+            await _context.SaveChangesAsync();
+
             return true;
         }
         catch (Exception)

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MiniMazErpBack;
 
@@ -20,7 +19,7 @@ public class InventoryService(AppDbContext context) : IInventoryService
                 WarningStock = inventoryDto.WarningStock
             };
             await _context.Inventories.AddAsync(inventory);
-
+            await _context.SaveChangesAsync();
             return inventory;
         }
         catch (Exception)
@@ -37,6 +36,7 @@ public class InventoryService(AppDbContext context) : IInventoryService
             ArgumentNullException.ThrowIfNull(inventory);
 
             _context.Inventories.Remove(inventory);
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception)
