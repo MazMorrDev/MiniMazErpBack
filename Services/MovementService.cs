@@ -10,6 +10,28 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
+            // Validar que Warehouse existe
+            var warehouseExists = await _context.Warehouses
+                .AnyAsync(w => w.ClientId == movementDto.WarehouseId);
+            if (!warehouseExists)
+            {
+                throw new ArgumentException($"Warehouse con ID {movementDto.WarehouseId} no existe");
+            }
+
+            // Validar que Product existe
+            var productExists = await _context.Products
+                .AnyAsync(p => p.Id == movementDto.ProductId);
+            if (!productExists)
+            {
+                throw new ArgumentException($"Producto con ID {movementDto.ProductId} no existe");
+            }
+
+            // Validar cantidad
+            if (movementDto.Quantity == 0)
+            {
+                throw new ArgumentException("La cantidad no puede ser 0");
+            }
+
             var movement = new Movement()
             {
                 WarehouseId = movementDto.WarehouseId,
@@ -18,8 +40,18 @@ public class MovementService(AppDbContext context) : IMovementService
                 Quantity = movementDto.Quantity,
                 MovementDate = movementDto.MovementDate,
             };
+
             await _context.Movements.AddAsync(movement);
             await _context.SaveChangesAsync();
+
+            // Cargar relaciones para retornar objeto completo
+            await _context.Entry(movement)
+                .Reference(m => m.Warehouse)
+                .LoadAsync();
+            await _context.Entry(movement)
+                .Reference(m => m.Product)
+                .LoadAsync();
+
             return movement;
         }
         catch (Exception)
@@ -33,15 +65,24 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
-            // Verificar si tiene registros hijos primero
-            var hasRelatedRecords = await HasRelatedRecordsAsync(id);
-            if (hasRelatedRecords) throw new InvalidOperationException("No se puede eliminar un movimiento que tiene registros relacionados (Buy/Sell/Expense)");
-
+            // Verificar si existe
             var movement = await _context.Movements.FindAsync(id);
-            ArgumentNullException.ThrowIfNull(movement);
+            if (movement == null)
+            {
+                return false;
+            }
+
+            // Verificar si tiene registros hijos
+            var hasRelatedRecords = await HasRelatedRecordsAsync(id);
+            if (hasRelatedRecords)
+            {
+                throw new InvalidOperationException(
+                    "No se puede eliminar un movimiento que tiene registros relacionados (Buy/Sell/Expense)");
+            }
 
             _context.Movements.Remove(movement);
-            return true;
+            var rowsAffected = await _context.SaveChangesAsync();
+            return rowsAffected > 0;
         }
         catch (Exception)
         {
@@ -54,7 +95,13 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
-            return await _context.Movements.ToListAsync();
+            return await _context.Movements
+                .Include(m => m.Warehouse)
+                .Include(m => m.Product)
+                .OrderByDescending(m => m.MovementDate)
+                .ThenByDescending(m => m.Id)
+                .AsNoTracking()
+                .ToListAsync();
         }
         catch (Exception)
         {
@@ -66,7 +113,10 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
-            return await _context.Movements.FindAsync(id);
+        return await _context.Movements
+            .Include(m => m.Warehouse)
+            .Include(m => m.Product)
+            .FirstOrDefaultAsync(m => m.Id == id);
         }
         catch (Exception)
         {
