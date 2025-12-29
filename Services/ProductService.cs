@@ -1,21 +1,25 @@
-﻿namespace MiniMazErpBack;
+﻿using Microsoft.EntityFrameworkCore;
 
-public class ProductService(ProductRepository repo) : IProductService
+namespace MiniMazErpBack;
+
+public class ProductService(AppDbContext context) : IProductService
 {
-    private readonly ProductRepository _repo = repo;
+    private readonly AppDbContext _context = context;
     public async Task<Product> CreateProductAsync(CreateProductDto productDto)
     {
         try
         {
             ArgumentNullException.ThrowIfNull(productDto);
-            
+
             var product = new Product()
             {
                 Name = productDto.Name,
                 SellPrice = productDto.SellPrice
             };
 
-            await _repo.CreateAsync(product);
+            await _context.Products.AddAsync(product);
+            await _context.SaveChangesAsync();
+
             return product;
         }
         catch (Exception)
@@ -28,10 +32,11 @@ public class ProductService(ProductRepository repo) : IProductService
     {
         try
         {
-            var product = await _repo.GetByIdAsync(id);
+            var product = await _context.Products.FindAsync(id);
             ArgumentNullException.ThrowIfNull(product);
 
-            await _repo.DeleteAsync(id);
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
 
             return true;
         }
@@ -45,7 +50,7 @@ public class ProductService(ProductRepository repo) : IProductService
     {
         try
         {
-            return await _repo.GetAllAsync();
+            return await _context.Products.ToListAsync();
         }
         catch (Exception)
         {
@@ -57,7 +62,7 @@ public class ProductService(ProductRepository repo) : IProductService
     {
         try
         {
-            return await _repo.GetByIdAsync(id);
+            return await _context.Products.FindAsync(id);
         }
         catch (Exception)
         {
@@ -65,19 +70,17 @@ public class ProductService(ProductRepository repo) : IProductService
         }
     }
 
-    public async Task<bool> UpdateProductAsync(UpdateProductDto productDto)
+    public async Task<bool> UpdateProductAsync(int id, UpdateProductDto productDto)
     {
         try
         {
             ArgumentNullException.ThrowIfNull(productDto);
-
-            var product = new Product()
-            {
-                Name = productDto.Name,
-                SellPrice = productDto.SellPrice
-            };
-
-            await _repo.UpdateAsync(product);
+            var product = await _context.Products.FindAsync(id);
+            ArgumentNullException.ThrowIfNull(product);
+            product.Name = productDto.Name;
+            product.SellPrice = productDto.SellPrice;
+            
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception)

@@ -10,6 +10,8 @@ public class InventoryService(AppDbContext context) : IInventoryService
     {
         try
         {
+            ArgumentNullException.ThrowIfNull(inventoryDto);
+
             var inventory = new Inventory()
             {
                 WarehouseId = inventoryDto.WarehouseId,
