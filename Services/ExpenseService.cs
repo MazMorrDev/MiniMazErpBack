@@ -1,9 +1,8 @@
 ﻿namespace MiniMazErpBack;
 
-public class ExpenseService(ExpenseRepository expenseRepo, IMovementRepository movementRepo) : IExpenseService
+public class ExpenseService(AppDbContext context) : IExpenseService
 {
-    private readonly ExpenseRepository _expenseRepo = expenseRepo;
-    private readonly IMovementRepository _movementRepo = movementRepo;
+    private readonly AppDbContext _context = context;
 
     public async Task<Expense> CreateExpenseAsync(Expense expense)
     {

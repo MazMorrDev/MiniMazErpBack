@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MiniMazErpBack;
 
-public class InventoryService(InventoryRepository repo) : IInventoryService
+public class InventoryService(AppDbContext context) : IInventoryService
 {
-    private readonly InventoryRepository _repo = repo;
+    private readonly AppDbContext _context = context;
 
     public async Task<Inventory> CreateInventoryAsync(CreateInventoryDto inventoryDto)
     {
@@ -18,7 +19,7 @@ public class InventoryService(InventoryRepository repo) : IInventoryService
                 AlertStock = inventoryDto.AlertStock,
                 WarningStock = inventoryDto.WarningStock
             };
-            await _repo.CreateAsync(inventory);
+            await _context.Inventories.AddAsync(inventory);
 
             return inventory;
         }
@@ -32,9 +33,10 @@ public class InventoryService(InventoryRepository repo) : IInventoryService
     {
         try
         {
-            var inventory = _repo.GetByIdAsync(id);
+            var inventory = await _context.Inventories.FindAsync(id);
             ArgumentNullException.ThrowIfNull(inventory);
-            await _repo.DeleteAsync(id);
+
+            _context.Inventories.Remove(inventory);
             return true;
         }
         catch (Exception)
@@ -47,7 +49,7 @@ public class InventoryService(InventoryRepository repo) : IInventoryService
     {
         try
         {
-            return await _repo.GetAllAsync();
+            return await _context.Inventories.ToListAsync();
         }
         catch (Exception)
         {
@@ -59,7 +61,7 @@ public class InventoryService(InventoryRepository repo) : IInventoryService
     {
         try
         {
-            return await _repo.GetByIdAsync(id);
+            return await _context.Inventories.FindAsync(id);
         }
         catch (Exception)
         {
@@ -67,19 +69,20 @@ public class InventoryService(InventoryRepository repo) : IInventoryService
         }
     }
 
-    public async Task<bool> UpdateInventoryAsync(UpdateInventoryDto inventoryDto)
+    public async Task<bool> UpdateInventoryAsync(int id, UpdateInventoryDto inventoryDto)
     {
         try
         {
-            var inventory = new Inventory()
-            {
-                WarehouseId = inventoryDto.WarehouseId,
-                ProductId = inventoryDto.ProductId,
-                Stock = inventoryDto.Stock,
-                AlertStock = inventoryDto.AlertStock,
-                WarningStock = inventoryDto.WarningStock
-            };
-            await _repo.UpdateAsync(inventory);
+            var inventory = await _context.Inventories.FindAsync(id);
+            ArgumentNullException.ThrowIfNull(inventory);
+
+            inventory.WarehouseId = inventoryDto.WarehouseId;
+            inventory.ProductId = inventoryDto.ProductId;
+            inventory.Stock = inventoryDto.Stock;
+            inventory.AlertStock = inventoryDto.AlertStock;
+            inventory.WarningStock = inventoryDto.WarningStock;
+
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception)

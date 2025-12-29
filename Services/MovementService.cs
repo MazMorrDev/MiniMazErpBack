@@ -1,16 +1,12 @@
 ﻿﻿namespace MiniMazErpBack;
 
-public class MovementService(MovementRepository movementRepo, BuyRepository buyRepo, 
-                            SellRepository sellRepo, ExpenseRepository expenseRepo) : IMovementService
+public class MovementService(AppDbContext context) : IMovementService
 {
-    private readonly MovementRepository _movementRepo = movementRepo;
-    private readonly BuyRepository _buyRepo = buyRepo;
-    private readonly SellRepository _sellRepo = sellRepo;
-    private readonly ExpenseRepository _expenseRepo = expenseRepo;
+    private readonly AppDbContext _context = context;
 
-    public async Task<Movement> CreateMovementAsync(Movement movement)
+    public async Task<Movement> CreateMovementAsync(CreateMovementDto movementDto)
     {
-        var movementId = await _movementRepo.CreateAsync(movement);
+        var movementId = await _context.CreateAsync(movement);
         movement.Id = movementId;
         return movement;
     }
@@ -37,7 +33,7 @@ public class MovementService(MovementRepository movementRepo, BuyRepository buyR
         return await _movementRepo.GetByIdAsync(id);
     }
 
-    public async Task<bool> UpdateMovementAsync(Movement movement)
+    public async Task<bool> UpdateMovementAsync(UpdateMovementDto movementDto)
     {
         // Verificar si tiene registros hijos antes de actualizar
         var hasRelatedRecords = await HasRelatedRecordsAsync(movement.Id);

@@ -6,5 +6,5 @@ public interface IInventoryService
     Task<bool> DeleteInventoryAsync(int id);
     Task<IEnumerable<Inventory>> GetAllInventoriesAsync();
     Task<Inventory?> GetInventoryByIdAsync(int id);
-    Task<bool> UpdateInventoryAsync(UpdateInventoryDto inventoryDto);
+    Task<bool> UpdateInventoryAsync(int id, UpdateInventoryDto inventoryDto);
 }

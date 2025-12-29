@@ -1,9 +1,8 @@
 ﻿namespace MiniMazErpBack;
 
-public class BuyService(BuyRepository buyRepo, MovementRepository movementRepo) : IBuyService
+public class BuyService(AppDbContext context) : IBuyService
 {
-    private readonly BuyRepository _buyRepo = buyRepo;
-    private readonly MovementRepository _movementRepo = movementRepo;
+    private readonly AppDbContext _context = context;
 
     public async Task<Buy> CreateBuyAsync(Buy buy)
     {
