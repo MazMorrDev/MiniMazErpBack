@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public class ClientService
+public class ClientService : IClientService
 {
 
 }

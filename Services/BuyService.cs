@@ -1,24 +1,38 @@
-﻿namespace MiniMazErpBack;
+﻿using Microsoft.EntityFrameworkCore;
 
-public class BuyService(AppDbContext context) : IBuyService
+namespace MiniMazErpBack;
+
+public class BuyService(AppDbContext context, MovementService movementService) : IBuyService
 {
     private readonly AppDbContext _context = context;
+    private readonly IMovementService _movementService = movementService;
 
-    public async Task<Buy> CreateBuyAsync(Buy buy)
+    public async Task<Buy> CreateBuyAsync(CreateBuyDto buyDto, CreateMovementDto movementDto)
     {
-        // Validar que el objeto Buy tiene un Movement válido
-        if (buy.Movement == null)
-            throw new ArgumentException("El objeto Buy debe tener un Movement asociado");
+        try
+        {
+            // Crear el Movement
+            var newMovement = await _movementService.CreateMovementAsync(movementDto);
+            await _context.Movements.AddAsync(newMovement);
 
-        // Primero crear el Movement
-        var movementId = await _movementRepo.CreateAsync(buy.Movement);
+            // Crear el nuevo Buy
+            var buy = new Buy()
+            {
+                MovementId = newMovement.Id,
+                Movement = newMovement,
+                UnitPrice = buyDto.UnitPrice
+            };
 
-        // Asignar el ID al Buy y crear el registro específico
-        buy.MovementId = movementId;
-        buy.Movement.Id = movementId;
+            await _context.Buys.AddAsync(buy);
 
-        await _buyRepo.CreateAsync(buy);
-        return buy;
+            await _context.SaveChangesAsync();
+            return buy;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
     }
 
     public async Task<bool> DeleteBuyAsync(int id)
