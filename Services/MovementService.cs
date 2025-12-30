@@ -11,26 +11,15 @@ public class MovementService(AppDbContext context) : IMovementService
         try
         {
             // Validar que Warehouse existe
-            var warehouseExists = await _context.Warehouses
-                .AnyAsync(w => w.ClientId == movementDto.WarehouseId);
-            if (!warehouseExists)
-            {
-                throw new ArgumentException($"Warehouse con ID {movementDto.WarehouseId} no existe");
-            }
+            var warehouseExists = await _context.Warehouses.AnyAsync(w => w.ClientId == movementDto.WarehouseId);
+            if (!warehouseExists) throw new ArgumentException($"Warehouse con ID {movementDto.WarehouseId} no existe");
 
             // Validar que Product existe
-            var productExists = await _context.Products
-                .AnyAsync(p => p.Id == movementDto.ProductId);
-            if (!productExists)
-            {
-                throw new ArgumentException($"Producto con ID {movementDto.ProductId} no existe");
-            }
+            var productExists = await _context.Products.AnyAsync(p => p.Id == movementDto.ProductId);
+            if (!productExists) throw new ArgumentException($"Producto con ID {movementDto.ProductId} no existe");
 
             // Validar cantidad
-            if (movementDto.Quantity == 0)
-            {
-                throw new ArgumentException("La cantidad no puede ser 0");
-            }
+            if (movementDto.Quantity == 0) throw new ArgumentException("La cantidad no puede ser 0");
 
             var movement = new Movement()
             {
@@ -45,12 +34,8 @@ public class MovementService(AppDbContext context) : IMovementService
             await _context.SaveChangesAsync();
 
             // Cargar relaciones para retornar objeto completo
-            await _context.Entry(movement)
-                .Reference(m => m.Warehouse)
-                .LoadAsync();
-            await _context.Entry(movement)
-                .Reference(m => m.Product)
-                .LoadAsync();
+            await _context.Entry(movement).Reference(m => m.Warehouse).LoadAsync();
+            await _context.Entry(movement).Reference(m => m.Product).LoadAsync();
 
             return movement;
         }
@@ -113,10 +98,10 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
-        return await _context.Movements
-            .Include(m => m.Warehouse)
-            .Include(m => m.Product)
-            .FirstOrDefaultAsync(m => m.Id == id);
+            return await _context.Movements
+                .Include(m => m.Warehouse)
+                .Include(m => m.Product)
+                .FirstOrDefaultAsync(m => m.Id == id);
         }
         catch (Exception)
         {
@@ -128,15 +113,8 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
-            // Verificar si tiene registros hijos antes de actualizar
-            var hasRelatedRecords = await HasRelatedRecordsAsync(id);
-            if (hasRelatedRecords)
-            {
-                throw new InvalidOperationException("No se puede actualizar un movimiento que tiene registros relacionados (Buy/Sell/Expense)");
-            }
-
             var movement = await _context.Movements.FindAsync(id);
-            ArgumentNullException.ThrowIfNull(movement);
+            if (movement == null) return false;
 
             movement.WarehouseId = movementDto.WarehouseId;
             movement.ProductId = movementDto.ProductId;
