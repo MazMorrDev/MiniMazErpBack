@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public record class UpdateSellDto
+public record class UpdateSellDto : UpdateMovementDto
 {
 
 }

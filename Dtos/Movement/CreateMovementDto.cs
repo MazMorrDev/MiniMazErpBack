@@ -5,17 +5,17 @@ namespace MiniMazErpBack;
 public record class CreateMovementDto
 {
     [Required]
-    public int WarehouseId { get; set; }
+    public int WarehouseId { get; init; }
 
     [Required]
-    public int ProductId { get; set; }
+    public int ProductId { get; init; }
 
     [ MaxLength(225)]
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 
     [Required]
-    public int Quantity { get; set; }
+    public int Quantity { get; init; }
 
     [Required]
-    public DateTimeOffset MovementDate { get; set; }
+    public DateTimeOffset MovementDate { get; init; }
 }

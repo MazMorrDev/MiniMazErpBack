@@ -1,6 +1,6 @@
 ﻿namespace MiniMazErpBack;
 
-public record class CreateSellDto
+public record class CreateSellDto : CreateMovementDto
 {
 
 }

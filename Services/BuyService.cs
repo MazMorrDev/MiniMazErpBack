@@ -7,13 +7,21 @@ public class BuyService(AppDbContext context, MovementService movementService) :
     private readonly AppDbContext _context = context;
     private readonly MovementService _movementService = movementService;
 
-    public async Task<Buy> CreateBuyAsync(CreateBuyDto buyDto, CreateMovementDto movementDto)
+    public async Task<Buy> CreateBuyAsync(CreateBuyDto buyDto)
     {
         try
         {
             // Crear el Movement
+            var movementDto = new CreateMovementDto()
+            {
+                WarehouseId = buyDto.WarehouseId,
+                ProductId = buyDto.ProductId,
+                Description = buyDto.Description,
+                Quantity = buyDto.Quantity,
+                MovementDate = buyDto.MovementDate
+            };
+
             var newMovement = await _movementService.CreateMovementAsync(movementDto);
-            await _context.Movements.AddAsync(newMovement);
 
             // Crear el nuevo Buy
             var buy = new Buy()
@@ -39,8 +47,12 @@ public class BuyService(AppDbContext context, MovementService movementService) :
     {
         try
         {
-            var buy = await _context.Buys.FindAsync(id);
-            ArgumentNullException.ThrowIfNull(buy);
+            var buy = await _context.Buys
+                .Include(b => b.Movement)
+                .FirstOrDefaultAsync(b => b.MovementId == id);
+
+            if (buy == null) return false;
+
             var movement = buy.Movement;
 
             _context.Buys.Remove(buy);
@@ -92,45 +104,49 @@ public class BuyService(AppDbContext context, MovementService movementService) :
     // Método adicional: Obtener Buy completo con Movement cargado
     public async Task<Buy?> GetFullBuyByIdAsync(int id)
     {
-        var buy = await _buyRepo.GetByIdAsync(id);
-        if (buy == null) return null;
-
-        // Cargar el Movement completo
-        var movement = await _movementRepo.GetByIdAsync(id);
-        if (movement != null)
+        try
         {
-            buy.Movement = movement;
+            return await _context.Buys
+                .Include(b => b.Movement)
+                .FirstOrDefaultAsync(b => b.MovementId == id);
         }
-
-        return buy;
-    }
-
-    // NUEVO: Método para eliminar completamente (Buy + Movement)
-    public async Task<bool> DeleteBuyAndMovementAsync(int id)
-    {
-        // Eliminar Buy primero
-        var buyDeleted = await _buyRepo.DeleteAsync(id);
-        if (!buyDeleted) return false;
-
-        // Luego eliminar Movement
-        return await _movementRepo.DeleteAsync(id);
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     // NUEVO: Método para verificar si existe una compra
     public async Task<bool> ExistsAsync(int id)
     {
-        return await _buyRepo.ExistsAsync(id);
+        return await _context.Buys.AnyAsync(b => b.MovementId == id);
     }
 
     // NUEVO: Método para obtener compras por producto
     public async Task<IEnumerable<Buy>> GetBuysByProductIdAsync(int productId)
     {
-        return await _buyRepo.GetByProductIdAsync(productId);
+        try
+        {
+            return await _context.Buys
+                .Include(b => b.Movement)
+                .Where(b => b.Movement != null && b.Movement.ProductId == productId)
+                .ToListAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    // NUEVO: Método para obtener compras por rango de fechas
     public async Task<IEnumerable<Buy>> GetBuysByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
     {
-        return await _buyRepo.GetByDateRangeAsync(startDate, endDate);
+        return await _context.Buys
+            .Include(b => b.Movement)
+            .ThenInclude(m => m.Product) // Opcional: incluir producto si lo necesitas
+            .Include(b => b.Movement)
+            .ThenInclude(m => m.Warehouse) // Opcional: incluir almacén si lo necesitas
+            .Where(b => b.Movement.MovementDate >= startDate && b.Movement.MovementDate <= endDate)
+            .OrderByDescending(b => b.Movement.MovementDate) // Ordenar por fecha más reciente primero
+            .ToListAsync();
     }
 }
