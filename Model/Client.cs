@@ -10,9 +10,9 @@ public class Client
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required, Column("name")]
+    [Required, Column("name"), MaxLength(20)]
     public required string Name { get; set; }
 
     [Required, Column("password")]
-    public required string Password { get; set; }
+    public required string HashedPassword { get; set; }
 }
