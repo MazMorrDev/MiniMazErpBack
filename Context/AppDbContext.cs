@@ -4,6 +4,7 @@ namespace MiniMazErpBack;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<Client> Clients { get; set; }
     public DbSet<Buy> Buys { get; set; }
     public DbSet<Inventory> Inventories { get; set; }
     public DbSet<Movement> Movements { get; set; }
