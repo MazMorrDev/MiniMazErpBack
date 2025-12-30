@@ -1,77 +1,153 @@
-﻿namespace MiniMazErpBack;
+﻿// SellService.cs
+using Microsoft.EntityFrameworkCore;
 
-public class SellService(ISellRepository sellRepo, IMovementRepository movementRepo) : ISellService
+namespace MiniMazErpBack;
+
+public class SellService(AppDbContext context, MovementService movementService) : ISellService
 {
-    private readonly ISellRepository _sellRepo = sellRepo;
-    private readonly IMovementRepository _movementRepo = movementRepo;
+    private readonly AppDbContext _context = context;
+    private readonly MovementService _movementService = movementService;
 
-    public async Task<Sell> CreateSellAsync(Sell sell)
+    public async Task<Sell> CreateSellAsync(CreateSellDto sellDto)
     {
-        if (sell.Movement == null)
-            throw new ArgumentException("El objeto Sell debe tener un Movement asociado");
+        try
+        {
+            // Crear el Movement
+            var movementDto = new CreateMovementDto()
+            {
+                WarehouseId = sellDto.WarehouseId,
+                ProductId = sellDto.ProductId,
+                Description = sellDto.Description,
+                Quantity = sellDto.Quantity,
+                MovementDate = sellDto.MovementDate
+            };
 
-        // Crear Movement primero
-        var movementId = await _movementRepo.CreateAsync(sell.Movement);
+            var newMovement = await _movementService.CreateMovementAsync(movementDto);
 
-        // Crear Sell con el mismo ID
-        sell.MovementId = movementId;
-        sell.Movement.Id = movementId;
+            // Crear el nuevo Sell
+            var sell = new Sell()
+            {
+                MovementId = newMovement.Id,
+                Movement = newMovement,
+                SalePrice = sellDto.SalePrice,
+                DiscountPercentage = sellDto.DiscountPercentage
+            };
 
-        await _sellRepo.CreateAsync(sell);
-        return sell;
+            await _context.Sells.AddAsync(sell);
+            await _context.SaveChangesAsync();
+            return sell;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task<bool> DeleteSellAsync(int id)
     {
-        return await _sellRepo.DeleteAsync(id);
+        try
+        {
+            var sell = await _context.Sells
+                .Include(s => s.Movement)
+                .FirstOrDefaultAsync(s => s.MovementId == id);
+
+            if (sell == null) return false;
+
+            var movement = sell.Movement;
+
+            _context.Sells.Remove(sell);
+            _context.Movements.Remove(movement);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task<IEnumerable<Sell>> GetAllSellsAsync()
     {
-        return await _sellRepo.GetAllAsync();
+        return await _context.Sells.ToListAsync();
     }
 
     public async Task<Sell?> GetSellByIdAsync(int id)
     {
-        return await _sellRepo.GetByIdAsync(id);
+        return await _context.Sells.FindAsync(id);
     }
 
-    public async Task<bool> UpdateSellAsync(Sell sell)
+    public async Task<bool> UpdateSellAsync(int id, UpdateSellDto sellDto)
     {
-        if (sell.Movement != null)
+        var movementDto = new UpdateMovementDto()
         {
-            await _movementRepo.UpdateAsync(sell.Movement);
-        }
+            WarehouseId = sellDto.WarehouseId,
+            ProductId = sellDto.ProductId,
+            Description = sellDto.Description,
+            Quantity = sellDto.Quantity,
+            MovementDate = sellDto.MovementDate
+        };
+        
+        // Actualizar el movement 
+        await _movementService.UpdateMovementAsync(id, movementDto);
 
-        return await _sellRepo.UpdateAsync(sell);
+        // Actualizar el sell
+        var sell = await _context.Sells.FindAsync(id);
+        ArgumentNullException.ThrowIfNull(sell);
+        sell.SalePrice = sellDto.SalePrice;
+        sell.DiscountPercentage = sellDto.DiscountPercentage;
+
+        // Mandar los cambios
+        await _context.SaveChangesAsync();
+        return true;
     }
 
-    // Métodos adicionales del repositorio Sell
+    // Método adicional: Obtener Sell completo con Movement cargado
+    public async Task<Sell?> GetFullSellByIdAsync(int id)
+    {
+        try
+        {
+            return await _context.Sells
+                .Include(s => s.Movement)
+                .FirstOrDefaultAsync(s => s.MovementId == id);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    // Método para verificar si existe un sell
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _context.Sells.AnyAsync(s => s.MovementId == id);
+    }
+
+    // Método para obtener sells por producto
     public async Task<IEnumerable<Sell>> GetSellsByProductIdAsync(int productId)
     {
-        if (_sellRepo is SellRepository sellRepository)
+        try
         {
-            return await sellRepository.GetByProductIdAsync(productId);
+            return await _context.Sells
+                .Include(s => s.Movement)
+                .Where(s => s.Movement != null && s.Movement.ProductId == productId)
+                .ToListAsync();
         }
-        throw new InvalidOperationException("El repositorio no es del tipo esperado");
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task<IEnumerable<Sell>> GetSellsByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
     {
-        if (_sellRepo is SellRepository sellRepository)
-        {
-            return await sellRepository.GetByDateRangeAsync(startDate, endDate);
-        }
-        throw new InvalidOperationException("El repositorio no es del tipo esperado");
-    }
-
-    // Método para obtener Sell completo
-    public async Task<Sell?> GetFullSellByIdAsync(int id)
-    {
-        var sell = await _sellRepo.GetByIdAsync(id);
-        if (sell == null) return null;
-
-        // El repositorio Sell ya carga Movement en GetByIdAsync
-        return sell;
+        return await _context.Sells
+            .Include(s => s.Movement)
+            .ThenInclude(m => m.Product)
+            .Include(s => s.Movement)
+            .ThenInclude(m => m.Warehouse)
+            .Where(s => s.Movement.MovementDate >= startDate && s.Movement.MovementDate <= endDate)
+            .OrderByDescending(s => s.Movement.MovementDate)
+            .ToListAsync();
     }
 }

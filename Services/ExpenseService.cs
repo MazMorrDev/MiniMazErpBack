@@ -1,93 +1,152 @@
-﻿namespace MiniMazErpBack;
+﻿using Microsoft.EntityFrameworkCore;
 
-public class ExpenseService(AppDbContext context) : IExpenseService
+namespace MiniMazErpBack;
+
+public class ExpenseService(AppDbContext context, MovementService movementService) : IExpenseService
 {
     private readonly AppDbContext _context = context;
+    private readonly MovementService _movementService = movementService;
 
-    public async Task<Expense> CreateExpenseAsync(Expense expense)
+    public async Task<Expense> CreateExpenseAsync(CreateExpenseDto expenseDto)
     {
-        if (expense.Movement == null)
-            throw new ArgumentException("El objeto Expense debe tener un Movement asociado");
+        try
+        {
+            // Crear el Movement
+            var movementDto = new CreateMovementDto()
+            {
+                WarehouseId = expenseDto.WarehouseId,
+                ProductId = expenseDto.ProductId,
+                Description = expenseDto.Description,
+                Quantity = expenseDto.Quantity,
+                MovementDate = expenseDto.MovementDate
+            };
 
-        // Crear Movement primero
-        var movementId = await _movementRepo.CreateAsync(expense.Movement);
+            var newMovement = await _movementService.CreateMovementAsync(movementDto);
 
-        // Crear Expense con el mismo ID
-        expense.MovementId = movementId;
-        expense.Movement.Id = movementId;
+            // Crear el nuevo Expense
+            var expense = new Expense()
+            {
+                MovementId = newMovement.Id,
+                Movement = newMovement,
+                ExpenseType = expenseDto.ExpenseType,
+                TotalPrice = expenseDto.TotalPrice
+            };
 
-        await _expenseRepo.CreateAsync(expense);
-        return expense;
+            await _context.Expenses.AddAsync(expense);
+            await _context.SaveChangesAsync();
+            return expense;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task<bool> DeleteExpenseAsync(int id)
     {
-        // Eliminar solo Expense (no Movement para mantener integridad histórica)
-        return await _expenseRepo.DeleteAsync(id);
+        try
+        {
+            var expense = await _context.Expenses
+                .Include(e => e.Movement)
+                .FirstOrDefaultAsync(e => e.MovementId == id);
+
+            if (expense == null) return false;
+
+            var movement = expense.Movement;
+
+            _context.Expenses.Remove(expense);
+            _context.Movements.Remove(movement);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public async Task<IEnumerable<Expense>> GetAllExpenseAsync()
+    public async Task<IEnumerable<Expense>> GetAllExpensesAsync()
     {
-        return await _expenseRepo.GetAllAsync();
+        return await _context.Expenses.ToListAsync();
     }
 
     public async Task<Expense?> GetExpenseByIdAsync(int id)
     {
-        return await _expenseRepo.GetByIdAsync(id);
+        return await _context.Expenses.FindAsync(id);
     }
 
-    public async Task<bool> UpdateExpenseAsync(Expense expense)
+    public async Task<bool> UpdateExpenseAsync(int id, UpdateExpenseDto expenseDto)
     {
-        // Actualizar Movement si es necesario
-        if (expense.Movement != null)
+        var movementDto = new UpdateMovementDto()
         {
-            await _movementRepo.UpdateAsync(expense.Movement);
-        }
+            WarehouseId = expenseDto.WarehouseId,
+            ProductId = expenseDto.ProductId,
+            Description = expenseDto.Description,
+            Quantity = expenseDto.Quantity,
+            MovementDate = expenseDto.MovementDate
+        };
 
-        return await _expenseRepo.UpdateAsync(expense);
+        // Actualizar el movement 
+        await _movementService.UpdateMovementAsync(id, movementDto);
+
+        // Actualizar el expense
+        var expense = await _context.Expenses.FindAsync(id);
+        ArgumentNullException.ThrowIfNull(expense);
+        expense.ExpenseType = expenseDto.ExpenseType;
+        expense.TotalPrice = expenseDto.TotalPrice;
+
+        // Mandar los cambios
+        await _context.SaveChangesAsync();
+        return true;
     }
 
-    // Método para eliminar completamente (Expense + Movement)
-    public async Task<bool> DeleteExpenseAndMovementAsync(int id)
-    {
-        // Eliminar Expense primero
-        var expenseDeleted = await _expenseRepo.DeleteAsync(id);
-        if (!expenseDeleted) return false;
-
-        // Luego eliminar Movement
-        return await _movementRepo.DeleteAsync(id);
-    }
-
-    // Método para obtener Expense con Movement cargado
+    // Método adicional: Obtener Expense completo con Movement cargado
     public async Task<Expense?> GetFullExpenseByIdAsync(int id)
     {
-        var expense = await _expenseRepo.GetByIdAsync(id);
-        if (expense == null) return null;
-
-        var movement = await _movementRepo.GetByIdAsync(id);
-        if (movement != null)
+        try
         {
-            expense.Movement = movement;
+            return await _context.Expenses
+                .Include(e => e.Movement)
+                .FirstOrDefaultAsync(e => e.MovementId == id);
         }
-
-        return expense;
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    // NUEVO: Método para verificar si existe un gasto
+    // Método para verificar si existe un expense
     public async Task<bool> ExistsAsync(int id)
     {
-        return await _expenseRepo.ExistsAsync(id);
+        return await _context.Expenses.AnyAsync(e => e.MovementId == id);
     }
 
-    // NUEVO: Método para obtener gastos por tipo
-    public async Task<IEnumerable<Expense>> GetByTypeAsync(ExpenseType expenseType)
+    // Método para obtener expenses por tipo
+    public async Task<IEnumerable<Expense>> GetExpensesByTypeAsync(ExpenseType expenseType)
     {
-        return await _expenseRepo.GetByTypeAsync(expenseType);
+        try
+        {
+            return await _context.Expenses
+                .Include(e => e.Movement)
+                .Where(e => e.ExpenseType == expenseType)
+                .ToListAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    // NUEVO: Método para obtener gastos por rango de fechas
     public async Task<IEnumerable<Expense>> GetExpensesByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
     {
-        return await _expenseRepo.GetByDateRangeAsync(startDate, endDate);
+        return await _context.Expenses
+            .Include(e => e.Movement)
+            .ThenInclude(m => m.Product)
+            .Include(e => e.Movement)
+            .ThenInclude(m => m.Warehouse)
+            .Where(e => e.Movement.MovementDate >= startDate && e.Movement.MovementDate <= endDate)
+            .OrderByDescending(e => e.Movement.MovementDate)
+            .ToListAsync();
     }
 }
