@@ -5,7 +5,7 @@ namespace MiniMazErpBack;
 public class BuyService(AppDbContext context, MovementService movementService) : IBuyService
 {
     private readonly AppDbContext _context = context;
-    private readonly IMovementService _movementService = movementService;
+    private readonly MovementService _movementService = movementService;
 
     public async Task<Buy> CreateBuyAsync(CreateBuyDto buyDto, CreateMovementDto movementDto)
     {
@@ -37,30 +37,56 @@ public class BuyService(AppDbContext context, MovementService movementService) :
 
     public async Task<bool> DeleteBuyAsync(int id)
     {
-        // Solo elimina de Buy, Movement se mantiene (o puedes implementar cascada si es necesario)
-        return await _buyRepo.DeleteAsync(id);
+        try
+        {
+            var buy = await _context.Buys.FindAsync(id);
+            ArgumentNullException.ThrowIfNull(buy);
+            var movement = buy.Movement;
+
+            _context.Buys.Remove(buy);
+            _context.Movements.Remove(movement);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
     }
 
     public async Task<IEnumerable<Buy>> GetAllBuysAsync()
     {
-        return await _buyRepo.GetAllAsync();
+        return await _context.Buys.ToListAsync();
     }
 
     public async Task<Buy?> GetBuyByIdAsync(int id)
     {
-        return await _buyRepo.GetByIdAsync(id);
+        return await _context.Buys.FindAsync(id);
     }
 
-    public async Task<bool> UpdateBuyAsync(Buy buy)
+    public async Task<bool> UpdateBuyAsync(int id, UpdateBuyDto buyDto)
     {
-        // Primero actualizar el Movement si es necesario
-        if (buy.Movement != null)
+        var movementDto = new UpdateMovementDto()
         {
-            await _movementRepo.UpdateAsync(buy.Movement);
-        }
+            WarehouseId = buyDto.WarehouseId,
+            ProductId = buyDto.ProductId,
+            Description = buyDto.Description,
+            Quantity = buyDto.Quantity,
+            MovementDate = buyDto.MovementDate
+        };
+        // Actualizar el movement 
+        await _movementService.UpdateMovementAsync(id, movementDto);
 
-        // Luego actualizar el Buy
-        return await _buyRepo.UpdateAsync(buy);
+        // Actualizar el buy
+        var buy = await _context.Buys.FindAsync(id);
+        ArgumentNullException.ThrowIfNull(buy);
+        buy.UnitPrice = buyDto.UnitPrice;
+
+        // Mandar los cambios
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     // Método adicional: Obtener Buy completo con Movement cargado
