@@ -13,7 +13,7 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
     {
         try
         {
-            var expenses = await _expenseService.GetAllExpenseAsync();
+            var expenses = await _expenseService.GetAllExpensesAsync();
             return Ok(expenses);
         }
         catch (Exception ex)
@@ -22,7 +22,7 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<Expense>> GetById(int id)
     {
         try
@@ -56,7 +56,7 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
                 return BadRequest("El precio total debe ser mayor a 0");
             }
 
-            if (!Enum.IsDefined(typeof(ExpenseType), expense.ExpenseType))
+            if (!Enum.IsDefined(expense.ExpenseType))
             {
                 return BadRequest("Tipo de gasto inválido");
             }
@@ -74,7 +74,7 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult> Update(int id, [FromBody] Expense expense)
     {
         try
@@ -104,7 +104,7 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
         try

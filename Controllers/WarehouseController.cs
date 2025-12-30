@@ -36,12 +36,12 @@ public class WarehouseController(WarehouseService warehouseService) : Controller
         }
     }
 
-    [HttpPut]
+    [HttpPut("[id:int]")]
     public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] UpdateWarehouseDto updateWarehouse)
     {
         try
         {
-            return Ok(await _service.UpdateWarehouseAsync(updateWarehouse));
+            return Ok(await _service.UpdateWarehouseAsync(id, updateWarehouse));
         }
         catch (Exception)
         {
