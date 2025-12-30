@@ -22,16 +22,14 @@ public class BuyController(BuyService buyService) : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<Buy>> GetById(int id)
     {
         try
         {
             var buy = await _buyService.GetBuyByIdAsync(id);
-            if (buy == null)
-            {
-                return NotFound($"Compra con ID {id} no encontrada");
-            }
+            if (buy == null) return NotFound($"Compra con ID {id} no encontrada");
+            
             return Ok(buy);
         }
         catch (Exception ex)
@@ -41,27 +39,15 @@ public class BuyController(BuyService buyService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Buy>> Create([FromBody] Buy buy)
+    public async Task<ActionResult<Buy>> Create([FromBody] CreateBuyDto buyDto)
     {
         try
         {
-            if (buy == null || buy.Movement == null)
-            {
-                return BadRequest("Los datos de compra son inválidos");
-            }
+            if (buyDto == null) return BadRequest("Buy data is invalid");
+            if (buyDto.UnitPrice <= 0) return BadRequest("Unitary price must be more than 0");
+            
 
-            // Validar datos básicos
-            if (buy.Movement.Quantity <= 0)
-            {
-                return BadRequest("La cantidad debe ser mayor a 0");
-            }
-
-            if (buy.UnitPrice <= 0)
-            {
-                return BadRequest("El precio unitario debe ser mayor a 0");
-            }
-
-            var createdBuy = await _buyService.CreateBuyAsync(buy);
+            var createdBuy = await _buyService.CreateBuyAsync(buyDto);
             return CreatedAtAction(nameof(GetById), new { id = createdBuy.MovementId }, createdBuy);
         }
         catch (ArgumentException ex)
@@ -74,27 +60,16 @@ public class BuyController(BuyService buyService) : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, [FromBody] Buy buy)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> Update(int id, [FromBody] UpdateBuyDto buyDto)
     {
         try
-        {
-            if (id != buy.MovementId)
-            {
-                return BadRequest("El ID de la ruta no coincide con el ID del objeto");
-            }
-
+        {   
             var existingBuy = await _buyService.GetBuyByIdAsync(id);
-            if (existingBuy == null)
-            {
-                return NotFound($"Compra con ID {id} no encontrada");
-            }
-
-            var result = await _buyService.UpdateBuyAsync(buy);
-            if (!result)
-            {
-                return StatusCode(500, "Error al actualizar la compra");
-            }
+            if (existingBuy == null) return NotFound($"Compra con ID {id} no encontrada");
+        
+            var result = await _buyService.UpdateBuyAsync(id, buyDto);
+            if (!result) return StatusCode(500, "Error al actualizar la compra");
 
             return NoContent();
         }
@@ -104,43 +79,18 @@ public class BuyController(BuyService buyService) : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
         try
         {
             var existingBuy = await _buyService.GetBuyByIdAsync(id);
-            if (existingBuy == null)
-            {
-                return NotFound($"Compra con ID {id} no encontrada");
-            }
-
+            if (existingBuy == null) return NotFound($"Compra con ID {id} no encontrada");
+            
             var result = await _buyService.DeleteBuyAsync(id);
-            if (!result)
-            {
-                return StatusCode(500, "Error al eliminar la compra");
-            }
-
+            if (!result) return StatusCode(500, "Error al eliminar la compra");
+            
             return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-        }
-    }
-
-    // Endpoint adicional para obtener compra completa con Movement
-    [HttpGet("{id}/full")]
-    public async Task<ActionResult<Buy>> GetFullById(int id)
-    {
-        try
-        {
-            var buy = await _buyService.GetFullBuyByIdAsync(id);
-            if (buy == null)
-            {
-                return NotFound($"Compra con ID {id} no encontrada");
-            }
-            return Ok(buy);
         }
         catch (Exception ex)
         {

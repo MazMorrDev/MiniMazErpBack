@@ -28,10 +28,8 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
         try
         {
             var expense = await _expenseService.GetExpenseByIdAsync(id);
-            if (expense == null)
-            {
-                return NotFound($"Gasto con ID {id} no encontrado");
-            }
+            if (expense == null) return NotFound($"Gasto con ID {id} no encontrado");
+            
             return Ok(expense);
         }
         catch (Exception ex)
@@ -41,27 +39,16 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Expense>> Create([FromBody] Expense expense)
+    public async Task<ActionResult<Expense>> Create([FromBody] CreateExpenseDto expenseDto)
     {
         try
         {
-            if (expense == null || expense.Movement == null)
-            {
-                return BadRequest("Los datos de gasto son inválidos");
-            }
-
             // Validar datos básicos
-            if (expense.TotalPrice <= 0)
-            {
-                return BadRequest("El precio total debe ser mayor a 0");
-            }
+            if (expenseDto.TotalPrice <= 0) return BadRequest("El precio total debe ser mayor a 0");
+        
+            if (!Enum.IsDefined(expenseDto.ExpenseType)) return BadRequest("Tipo de gasto inválido"); 
 
-            if (!Enum.IsDefined(expense.ExpenseType))
-            {
-                return BadRequest("Tipo de gasto inválido");
-            }
-
-            var createdExpense = await _expenseService.CreateExpenseAsync(expense);
+            var createdExpense = await _expenseService.CreateExpenseAsync(expenseDto);
             return CreatedAtAction(nameof(GetById), new { id = createdExpense.MovementId }, createdExpense);
         }
         catch (ArgumentException ex)
@@ -75,26 +62,15 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult> Update(int id, [FromBody] Expense expense)
+    public async Task<ActionResult> Update(int id, [FromBody] UpdateExpenseDto expenseDto)
     {
         try
         {
-            if (id != expense.MovementId)
-            {
-                return BadRequest("El ID de la ruta no coincide con el ID del objeto");
-            }
-
             var existingExpense = await _expenseService.GetExpenseByIdAsync(id);
-            if (existingExpense == null)
-            {
-                return NotFound($"Gasto con ID {id} no encontrado");
-            }
+            if (existingExpense == null) return NotFound($"Gasto con ID {id} no encontrado");
 
-            var result = await _expenseService.UpdateExpenseAsync(expense);
-            if (!result)
-            {
-                return StatusCode(500, "Error al actualizar el gasto");
-            }
+            var result = await _expenseService.UpdateExpenseAsync(id, expenseDto);
+            if (!result) return StatusCode(500, "Error al actualizar el gasto");
 
             return NoContent();
         }
@@ -110,63 +86,12 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
         try
         {
             var existingExpense = await _expenseService.GetExpenseByIdAsync(id);
-            if (existingExpense == null)
-            {
-                return NotFound($"Gasto con ID {id} no encontrado");
-            }
+            if (existingExpense == null) return NotFound($"Gasto con ID {id} no encontrado");
 
             var result = await _expenseService.DeleteExpenseAsync(id);
-            if (!result)
-            {
-                return StatusCode(500, "Error al eliminar el gasto");
-            }
+            if (!result) return StatusCode(500, "Error al eliminar el gasto");
 
             return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-        }
-    }
-
-    // Endpoint para eliminar completamente (Expense + Movement)
-    [HttpDelete("{id}/complete")]
-    public async Task<ActionResult> DeleteComplete(int id)
-    {
-        try
-        {
-            var existingExpense = await _expenseService.GetExpenseByIdAsync(id);
-            if (existingExpense == null)
-            {
-                return NotFound($"Gasto con ID {id} no encontrado");
-            }
-
-            var result = await _expenseService.DeleteExpenseAndMovementAsync(id);
-            if (!result)
-            {
-                return StatusCode(500, "Error al eliminar el gasto completamente");
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-        }
-    }
-
-    // Endpoint para obtener gasto completo con Movement
-    [HttpGet("{id}/full")]
-    public async Task<ActionResult<Expense>> GetFullById(int id)
-    {
-        try
-        {
-            var expense = await _expenseService.GetFullExpenseByIdAsync(id);
-            if (expense == null)
-            {
-                return NotFound($"Gasto con ID {id} no encontrado");
-            }
-            return Ok(expense);
         }
         catch (Exception ex)
         {
@@ -180,7 +105,7 @@ public class ExpenseController(ExpenseService expenseService) : ControllerBase
     {
         try
         {
-            var expenses = await _expenseService.GetByTypeAsync(expenseType);
+            var expenses = await _expenseService.GetExpensesByTypeAsync(expenseType);
             return Ok(expenses);
         }
         catch (Exception ex)

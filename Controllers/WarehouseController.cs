@@ -8,7 +8,7 @@ public class WarehouseController(WarehouseService warehouseService) : Controller
 {
     private readonly WarehouseService _service = warehouseService;
 
-    [HttpGet("[id:int]")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetWarehouseById(int id)
     {
         try
@@ -36,7 +36,7 @@ public class WarehouseController(WarehouseService warehouseService) : Controller
         }
     }
 
-    [HttpPut("[id:int]")]
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] UpdateWarehouseDto updateWarehouse)
     {
         try
