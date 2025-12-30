@@ -3,5 +3,5 @@
 public interface IClientService
 {
     Task<Client> RegisterClient(RegisterClientDto clientDto);
-    Task<Client> LoginClient(LoginClientDto clientDto);
+    Task<Client?> LoginClient(LoginClientDto clientDto);
 }
