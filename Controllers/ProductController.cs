@@ -11,7 +11,12 @@ public class ProductController(ProductService service) : ControllerBase
     {
         try
         {
-
+            var createdProduct = await _service.CreateProductAsync(productDto);
+            return CreatedAtAction(nameof(GetById), new { id = createdProduct.Id }, createdProduct);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
@@ -24,11 +29,17 @@ public class ProductController(ProductService service) : ControllerBase
     {
         try
         {
+            var existingProduct = await _service.GetProductByIdAsync(id);
+            if (existingProduct == null) return NotFound($"Gasto con ID {id} no encontrado");
 
+            var result = await _service.UpdateProductAsync(id, productDto);
+            if (!result) return StatusCode(500, "Error al actualizar el gasto");
+
+            return NoContent();
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Error interno del servidor {ex.Message}");
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
 
@@ -37,11 +48,17 @@ public class ProductController(ProductService service) : ControllerBase
     {
         try
         {
+            var existingProduct = await _service.GetProductByIdAsync(id);
+            if (existingProduct == null) return NotFound($"Gasto con ID {id} no encontrado");
 
+            var result = await _service.DeleteProductAsync(id);
+            if (!result) return StatusCode(500, "Error al eliminar el gasto");
+
+            return NoContent();
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Error interno del servidor {ex.Message}");
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
 
@@ -50,7 +67,7 @@ public class ProductController(ProductService service) : ControllerBase
     {
         try
         {
-
+            return Ok(await _service.GetAllProductsAsync());
         }
         catch (Exception ex)
         {
@@ -63,7 +80,7 @@ public class ProductController(ProductService service) : ControllerBase
     {
         try
         {
-
+            return Ok(await _service.GetProductByIdAsync(id));
         }
         catch (Exception ex)
         {
