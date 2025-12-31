@@ -40,7 +40,6 @@ public class BuyService(AppDbContext context, MovementService movementService) :
         {
             throw;
         }
-
     }
 
     public async Task<bool> DeleteBuyAsync(int id)

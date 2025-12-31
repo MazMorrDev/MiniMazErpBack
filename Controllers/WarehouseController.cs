@@ -1,23 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[Controller]")]
+[Authorize]
 public class WarehouseController(WarehouseService warehouseService) : ControllerBase
 {
     private readonly WarehouseService _service = warehouseService;
 
-    [HttpGet("[id:int]")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetWarehouseById(int id)
     {
         try
         {
             return Ok(await _service.GetWarehouseByIdAsync(id));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw;
+            return StatusCode(500, $"Error del servidor: {ex.Message}");
         }
     }
 
@@ -26,26 +28,35 @@ public class WarehouseController(WarehouseService warehouseService) : Controller
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(warehouseDto);
-
-            return Ok(await _service.CreateWarehouseAsync(warehouseDto));
+            var createdWarehouse = await _service.CreateWarehouseAsync(warehouseDto);
+            return CreatedAtAction(nameof(GetWarehouseById), new { id = createdWarehouse.ClientId }, createdWarehouse);
         }
-        catch (Exception)
+        catch (ArgumentException ex)
         {
-            throw;
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
 
-    [HttpPut]
-    public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] UpdateWarehouseDto updateWarehouse)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] UpdateWarehouseDto warehouseDto)
     {
         try
         {
-            return Ok(await _service.UpdateWarehouseAsync(updateWarehouse));
+            var existingWarehouse = await _service.GetWarehouseByIdAsync(id);
+            if (existingWarehouse == null) return NotFound($"Almacén con ID {id} no encontrado");
+
+            var result = await _service.UpdateWarehouseAsync(id, warehouseDto);
+            if (!result) return StatusCode(500, "Error al actualizar el gasto");
+
+            return NoContent();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw;
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
 }

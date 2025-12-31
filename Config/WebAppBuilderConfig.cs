@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text;
+using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MiniMazErpBack;
 
@@ -10,8 +14,36 @@ public class WebAppBuilderConfig
         // Add services to the container.
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi("v1"); // Customize the document name
-        // builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
+        builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
+        builder.Services.AddScoped<BuyService>();
+        builder.Services.AddScoped<ClientService>();
+        builder.Services.AddScoped<ExpenseService>();
+        builder.Services.AddScoped<InventoryService>();
+        builder.Services.AddScoped<MovementService>();
+        builder.Services.AddScoped<ProductService>();
+        builder.Services.AddScoped<SellService>();
+        builder.Services.AddScoped<WarehouseService>();
         builder.Services.AddControllers();
+
+        // 1. Agregar servicios de autenticación
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,          // Para proyecto simple: FALSE
+                    ValidateAudience = false,        // Para proyecto simple: FALSE  
+                    ValidateLifetime = true,         // Que expire: TRUE
+                    ValidateIssuerSigningKey = true, // Que esté firmado: TRUE
+
+                    // Usa la MISMA clave que en GenerateJwtToken
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            builder.Configuration["JWT_KEY"] ?? "fallback_key_32_chars_long_123456"
+                        )
+                    )
+                };
+            });
     }
 
     public static void ConfigureCorsPolicy(WebApplicationBuilder builder)

@@ -10,7 +10,7 @@ public class ClientService(AppDbContext context) : IClientService
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(clientDto.Name)) throw new ArgumentException("Name is required", nameof(clientDto));
+            if (string.IsNullOrWhiteSpace(clientDto.Name))throw new ArgumentException("Name is required", nameof(clientDto));
             if (string.IsNullOrWhiteSpace(clientDto.Password)) throw new ArgumentException("Password is required", nameof(clientDto));
 
             // Hash de la contraseña

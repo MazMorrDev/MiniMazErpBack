@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMazErpBack.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SellController(SellService sellService) : ControllerBase
 {
     private readonly SellService _sellService = sellService;
@@ -22,16 +24,14 @@ public class SellController(SellService sellService) : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<Sell>> GetById(int id)
     {
         try
         {
             var sell = await _sellService.GetSellByIdAsync(id);
-            if (sell == null)
-            {
-                return NotFound($"Venta con ID {id} no encontrada");
-            }
+            if (sell == null) return NotFound($"Venta con ID {id} no encontrada");
+            
             return Ok(sell);
         }
         catch (Exception ex)
@@ -41,32 +41,17 @@ public class SellController(SellService sellService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Sell>> Create([FromBody] Sell sell)
+    public async Task<ActionResult<Sell>> Create([FromBody] CreateSellDto sellDto)
     {
         try
         {
-            if (sell == null || sell.Movement == null)
-            {
-                return BadRequest("Los datos de venta son inválidos");
-            }
-
             // Validar datos básicos
-            if (sell.SalePrice <= 0)
-            {
-                return BadRequest("El precio de venta debe ser mayor a 0");
-            }
-
-            if (sell.DiscountPercentage < 0 || sell.DiscountPercentage > 100)
-            {
+            if (sellDto.SalePrice <= 0) return BadRequest("El precio de venta debe ser mayor a 0");
+            
+            if (sellDto.DiscountPercentage < 0 || sellDto.DiscountPercentage > 100) 
                 return BadRequest("El porcentaje de descuento debe estar entre 0 y 100");
-            }
 
-            if (sell.Movement.Quantity <= 0)
-            {
-                return BadRequest("La cantidad debe ser mayor a 0");
-            }
-
-            var createdSell = await _sellService.CreateSellAsync(sell);
+            var createdSell = await _sellService.CreateSellAsync(sellDto);
             return CreatedAtAction(nameof(GetById), new { id = createdSell.MovementId }, createdSell);
         }
         catch (ArgumentException ex)
@@ -79,28 +64,17 @@ public class SellController(SellService sellService) : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, [FromBody] Sell sell)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> Update(int id, [FromBody] UpdateSellDto sellDto)
     {
         try
         {
-            if (id != sell.MovementId)
-            {
-                return BadRequest("El ID de la ruta no coincide con el ID del objeto");
-            }
-
             var existingSell = await _sellService.GetSellByIdAsync(id);
-            if (existingSell == null)
-            {
-                return NotFound($"Venta con ID {id} no encontrada");
-            }
-
-            var result = await _sellService.UpdateSellAsync(sell);
-            if (!result)
-            {
-                return StatusCode(500, "Error al actualizar la venta");
-            }
-
+            if (existingSell == null) return NotFound($"Venta con ID {id} no encontrada");
+            
+            var result = await _sellService.UpdateSellAsync(id, sellDto);
+            if (!result) return StatusCode(500, "Error al actualizar la venta");
+            
             return NoContent();
         }
         catch (Exception ex)
@@ -109,22 +83,18 @@ public class SellController(SellService sellService) : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
         try
         {
             var existingSell = await _sellService.GetSellByIdAsync(id);
-            if (existingSell == null)
-            {
-                return NotFound($"Venta con ID {id} no encontrada");
-            }
+            if (existingSell == null) return NotFound($"Venta con ID {id} no encontrada");
+            
 
             var result = await _sellService.DeleteSellAsync(id);
-            if (!result)
-            {
-                return StatusCode(500, "Error al eliminar la venta");
-            }
+            if (!result) return StatusCode(500, "Error al eliminar la venta");
+            
 
             return NoContent();
         }
@@ -157,10 +127,7 @@ public class SellController(SellService sellService) : ControllerBase
     {
         try
         {
-            if (startDate > endDate)
-            {
-                return BadRequest("La fecha de inicio no puede ser mayor a la fecha de fin");
-            }
+            if (startDate > endDate) return BadRequest("La fecha de inicio no puede ser mayor a la fecha de fin");
 
             var sells = await _sellService.GetSellsByDateRangeAsync(startDate, endDate);
             return Ok(sells);
@@ -172,16 +139,14 @@ public class SellController(SellService sellService) : ControllerBase
     }
 
     // Endpoint para obtener venta completa
-    [HttpGet("{id}/full")]
+    [HttpGet("{id:int}/full")]
     public async Task<ActionResult<Sell>> GetFullById(int id)
     {
         try
         {
             var sell = await _sellService.GetFullSellByIdAsync(id);
-            if (sell == null)
-            {
-                return NotFound($"Venta con ID {id} no encontrada");
-            }
+            if (sell == null) return NotFound($"Venta con ID {id} no encontrada");
+            
             return Ok(sell);
         }
         catch (Exception ex)
