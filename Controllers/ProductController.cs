@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ProductController(ProductService service) : ControllerBase
 {
-    private readonly IProductService _service = service;
+    private readonly ProductService _service = service;
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateProductDto productDto)
@@ -32,7 +34,7 @@ public class ProductController(ProductService service) : ControllerBase
         try
         {
             var existingProduct = await _service.GetProductByIdAsync(id);
-            if (existingProduct == null) return NotFound($"Gasto con ID {id} no encontrado");
+            if (existingProduct == null) return NotFound($"Producto con ID {id} no encontrado");
 
             var result = await _service.UpdateProductAsync(id, productDto);
             if (!result) return StatusCode(500, "Error al actualizar el gasto");

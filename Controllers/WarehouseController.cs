@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[Controller]")]
+[Authorize]
 public class WarehouseController(WarehouseService warehouseService) : ControllerBase
 {
     private readonly WarehouseService _service = warehouseService;
@@ -45,7 +47,7 @@ public class WarehouseController(WarehouseService warehouseService) : Controller
         try
         {
             var existingWarehouse = await _service.GetWarehouseByIdAsync(id);
-            if (existingWarehouse == null) return NotFound($"Gasto con ID {id} no encontrado");
+            if (existingWarehouse == null) return NotFound($"Almacén con ID {id} no encontrado");
 
             var result = await _service.UpdateWarehouseAsync(id, warehouseDto);
             if (!result) return StatusCode(500, "Error al actualizar el gasto");

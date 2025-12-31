@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMazErpBack.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BuyController(BuyService buyService) : ControllerBase
 {
     private readonly BuyService _buyService = buyService;

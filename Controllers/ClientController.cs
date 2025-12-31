@@ -65,22 +65,21 @@ public class ClientController(IClientService service, ILogger logger, IConfigura
     private string GenerateJwtToken(Client client)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration[Env.GetString("JWT_KEY")] ?? "fallback_key_32_chars_long_123456");
+        var key = Encoding.UTF8.GetBytes(_configuration["JWT_KEY"] ?? "fallback_key_32_chars_long_123456");
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(
             [
-            new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
-            new Claim(ClaimTypes.Name, client.Name),
-            new Claim("client_id", client.Id.ToString())
-        ]),
+                new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
+                new Claim(ClaimTypes.Name, client.Name),
+                new Claim("client_id", client.Id.ToString())
+            ]),
+
             Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(_configuration[Env.GetString("JWT_EXPIRE_HOURS")] ?? "24")),
             Issuer = _configuration[Env.GetString("JWT_ISSUER")],
             Audience = _configuration[Env.GetString("JWT_AUDIENCE")],
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);

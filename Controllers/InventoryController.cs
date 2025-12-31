@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class InventoryController(IInventoryService service) : ControllerBase
 {
     private readonly IInventoryService _service = service;
@@ -32,7 +34,7 @@ public class InventoryController(IInventoryService service) : ControllerBase
         try
         {
             var existingInventory = await _service.GetInventoryByIdAsync(id);
-            if (existingInventory == null) return NotFound($"Gasto con ID {id} no encontrado");
+            if (existingInventory == null) return NotFound($"Inventario con ID {id} no encontrado");
 
             var result = await _service.UpdateInventoryAsync(id, inventoryDto);
             if (!result) return StatusCode(500, "Error al actualizar el gasto");
