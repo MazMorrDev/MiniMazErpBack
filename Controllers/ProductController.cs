@@ -2,6 +2,8 @@
 
 namespace MiniMazErpBack;
 
+[ApiController]
+[Route("api/[controller]")]
 public class ProductController(ProductService service) : ControllerBase
 {
     private readonly IProductService _service = service;
