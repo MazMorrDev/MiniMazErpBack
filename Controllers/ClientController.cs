@@ -1,13 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using DotNetEnv;
 
 namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController(IClientService service, ILogger logger) : ControllerBase
+public class ClientController(IClientService service, ILogger logger, IConfiguration configuration) : ControllerBase
 {
     private readonly IClientService _service = service;
     private readonly ILogger _logger = logger;
+    private readonly IConfiguration _configuration = configuration;
 
     [HttpPost]
     public async Task<IActionResult> RegisterClient([FromBody] RegisterClientDto clientDto)
@@ -36,12 +42,12 @@ public class ClientController(IClientService service, ILogger logger) : Controll
                 return Unauthorized(new { message = "Invalid credentials" }); // ✅ 401
 
             // ✅ Generar token JWT (esto es lo que falta)
-            var token = _service.GenerateJwtToken(client);
+            var token = GenerateJwtToken(client);
 
             return Ok(new
             {
                 message = "Login successful",
-                token = token,
+                token,
                 user = new { client.Id, client.Name }
             });
         }
@@ -54,5 +60,30 @@ public class ClientController(IClientService service, ILogger logger) : Controll
             _logger.LogError(ex, "Login error");
             return StatusCode(500, new { error = "Internal server error" });
         }
+    }
+
+    private string GenerateJwtToken(Client client)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_configuration[Env.GetString("JWT_KEY")] ?? "fallback_key_32_chars_long_123456");
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(
+            [
+            new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
+            new Claim(ClaimTypes.Name, client.Name),
+            new Claim("client_id", client.Id.ToString())
+        ]),
+            Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(_configuration[Env.GetString("JWT_EXPIRE_HOURS")] ?? "24")),
+            Issuer = _configuration[Env.GetString("JWT_ISSUER")],
+            Audience = _configuration[Env.GetString("JWT_AUDIENCE")],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 }
