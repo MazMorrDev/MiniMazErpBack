@@ -16,9 +16,9 @@ public class ClientController(IClientService service, ILogger logger) : Controll
         {
             return Ok(await _service.RegisterClient(clientDto));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw;
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 
