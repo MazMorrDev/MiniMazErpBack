@@ -13,7 +13,12 @@ public class InventoryController(IInventoryService service) : ControllerBase
     {
         try
         {
-
+            var createdInventory = await _service.CreateInventoryAsync(inventoryDto);
+            return CreatedAtAction(nameof(GetById), new { id = createdInventory.Id }, createdInventory);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
@@ -26,11 +31,17 @@ public class InventoryController(IInventoryService service) : ControllerBase
     {
         try
         {
+            var existingInventory = await _service.GetInventoryByIdAsync(id);
+            if (existingInventory == null) return NotFound($"Gasto con ID {id} no encontrado");
 
+            var result = await _service.UpdateInventoryAsync(id, inventoryDto);
+            if (!result) return StatusCode(500, "Error al actualizar el gasto");
+
+            return NoContent();
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Error interno del servidor {ex.Message}");
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
 
@@ -39,11 +50,17 @@ public class InventoryController(IInventoryService service) : ControllerBase
     {
         try
         {
+            var existingInventory = await _service.GetInventoryByIdAsync(id);
+            if (existingInventory == null) return NotFound($"Gasto con ID {id} no encontrado");
 
+            var result = await _service.DeleteInventoryAsync(id);
+            if (!result) return StatusCode(500, "Error al eliminar el gasto");
+
+            return NoContent();
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Error interno del servidor {ex.Message}");
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
 
@@ -52,7 +69,7 @@ public class InventoryController(IInventoryService service) : ControllerBase
     {
         try
         {
-
+            return Ok(await _service.GetAllInventoriesAsync());
         }
         catch (Exception ex)
         {
@@ -65,7 +82,7 @@ public class InventoryController(IInventoryService service) : ControllerBase
     {
         try
         {
-
+            return Ok(await _service.GetInventoryByIdAsync(id));
         }
         catch (Exception ex)
         {
