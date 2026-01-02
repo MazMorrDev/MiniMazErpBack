@@ -17,8 +17,10 @@ public class WebAppConfig
     public static void UseGeneralAppConfigs(WebApplication app)
     {
         app.UseCors("AllowSpecificOrigin");
+        // app.UseHttpsRedirection();
+        app.UseRouting();
         app.UseAuthentication();
-        app.UseHttpsRedirection();
+        app.UseAuthorization();
         app.MapControllers();
         app.Run();
     }

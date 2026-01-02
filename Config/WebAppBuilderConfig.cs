@@ -31,15 +31,18 @@ public class WebAppBuilderConfig
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,          // Para proyecto simple: FALSE
-                    ValidateAudience = false,        // Para proyecto simple: FALSE  
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = true,         // Que expire: TRUE
                     ValidateIssuerSigningKey = true, // Que esté firmado: TRUE
+
+                    ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "MiniMazErpBack",
+                    ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "MiniMazErpFront",
 
                     // Usa la MISMA clave que en GenerateJwtToken
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(
-                            builder.Configuration["JWT_KEY"] ?? "fallback_key_32_chars_long_123456"
+                           Environment.GetEnvironmentVariable("JWT_KEY") ?? "fallback_key_32_chars_long_123456"
                         )
                     )
                 };

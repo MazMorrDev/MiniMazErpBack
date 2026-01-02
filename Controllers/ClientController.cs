@@ -28,7 +28,6 @@ public class ClientController(ClientService service, ILogger<ClientController> l
         }
     }
 
-    // TODO: estudiar el correcto funcionamiento y configuración de los JWT  
     [HttpPost("login")]
     public async Task<IActionResult> LoginClient([FromBody] LoginClientDto clientDto)
     {
@@ -65,7 +64,7 @@ public class ClientController(ClientService service, ILogger<ClientController> l
     private string GenerateJwtToken(Client client)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration["JWT_KEY"] ?? "fallback_key_32_chars_long_123456");
+        var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "fallback_key_32_chars_long_123456");
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -73,12 +72,11 @@ public class ClientController(ClientService service, ILogger<ClientController> l
             [
                 new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
                 new Claim(ClaimTypes.Name, client.Name),
-                new Claim("client_id", client.Id.ToString())
             ]),
 
-            Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(_configuration[Env.GetString("JWT_EXPIRE_HOURS")] ?? "24")),
-            Issuer = _configuration[Env.GetString("JWT_ISSUER")],
-            Audience = _configuration[Env.GetString("JWT_AUDIENCE")],
+            Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(Environment.GetEnvironmentVariable("JWT_EXPIRE_HOURS") ?? "24")),
+            Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "MiniMazErpBack",
+            Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "MiniMazErpFront",
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
