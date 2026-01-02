@@ -9,9 +9,9 @@ namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController(IClientService service, ILogger logger, IConfiguration configuration) : ControllerBase
+public class ClientController(ClientService service, ILogger<ClientController> logger, IConfiguration configuration) : ControllerBase
 {
-    private readonly IClientService _service = service;
+    private readonly ClientService _service = service;
     private readonly ILogger _logger = logger;
     private readonly IConfiguration _configuration = configuration;
 
