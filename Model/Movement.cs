@@ -10,8 +10,8 @@ public class Movement
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required, Column("warehouse_id")]
-    public int WarehouseId { get; set; }
+    [Required, Column("inventory_id")]
+    public int InventoryId { get; set; }
 
     [Required, Column("product_id")]
     public int ProductId { get; set; }
@@ -25,8 +25,8 @@ public class Movement
     [Required, Column("movement_date")]
     public DateTimeOffset MovementDate { get; set; }
 
-    [ForeignKey("WarehouseId")]
-    public virtual Warehouse Warehouse { get; set; } = null!;
+    [ForeignKey("InventoryId")]
+    public virtual Inventory Inventory { get; set; } = null!;
 
     [ForeignKey("ProductId")]
     public virtual Product Product { get; set; } = null!;
