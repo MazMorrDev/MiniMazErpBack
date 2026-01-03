@@ -10,8 +10,8 @@ public class Inventory
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required, Column("warehouse_id")]
-    public int WarehouseId { get; set; }
+    [Required, Column("client_id")]
+    public int ClientId { get; set; }
 
     [Required, Column("product_id")]
     public int ProductId { get; set; }
@@ -31,8 +31,8 @@ public class Inventory
     public int? WarningStock { get; set; }
 
     // Navigation Properties
-    [ForeignKey("WarehouseId")]
-    public virtual Warehouse Warehouse { get; set; } = null!;
+    [ForeignKey("ClientId")]
+    public virtual Client Client { get; set; } = null!;
 
     [ForeignKey("ProductId")]
     public virtual Product Product { get; set; } = null!;
