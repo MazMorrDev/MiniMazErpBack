@@ -5,7 +5,7 @@ namespace MiniMazErpBack;
 public record class UpdateMovementDto
 {
     [Required]
-    public int WarehouseId { get; set; }
+    public int InventoryId { get; set; }
     [Required]
     public int ProductId { get; set; }
     [MaxLength(225)]

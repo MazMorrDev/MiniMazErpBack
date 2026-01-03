@@ -14,7 +14,7 @@ public class BuyService(AppDbContext context, MovementService movementService) :
             // Crear el Movement
             var movementDto = new CreateMovementDto()
             {
-                WarehouseId = buyDto.WarehouseId,
+                InventoryId = buyDto.InventoryId,
                 ProductId = buyDto.ProductId,
                 Description = buyDto.Description,
                 Quantity = buyDto.Quantity,
@@ -81,7 +81,7 @@ public class BuyService(AppDbContext context, MovementService movementService) :
     {
         var movementDto = new UpdateMovementDto()
         {
-            WarehouseId = buyDto.WarehouseId,
+            InventoryId = buyDto.InventoryId,
             ProductId = buyDto.ProductId,
             Description = buyDto.Description,
             Quantity = buyDto.Quantity,
@@ -143,7 +143,7 @@ public class BuyService(AppDbContext context, MovementService movementService) :
             .Include(b => b.Movement)
             .ThenInclude(m => m.Product) // Opcional: incluir producto si lo necesitas
             .Include(b => b.Movement)
-            .ThenInclude(m => m.Warehouse) // Opcional: incluir almacén si lo necesitas
+            .ThenInclude(i => i.Inventory) // Opcional: incluir inventario si lo necesitas
             .Where(b => b.Movement.MovementDate >= startDate && b.Movement.MovementDate <= endDate)
             .OrderByDescending(b => b.Movement.MovementDate) // Ordenar por fecha más reciente primero
             .ToListAsync();

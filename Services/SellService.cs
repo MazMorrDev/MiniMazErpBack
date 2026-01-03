@@ -15,7 +15,7 @@ public class SellService(AppDbContext context, MovementService movementService) 
             // Crear el Movement
             var movementDto = new CreateMovementDto()
             {
-                WarehouseId = sellDto.WarehouseId,
+                InventoryId = sellDto.InventoryId,
                 ProductId = sellDto.ProductId,
                 Description = sellDto.Description,
                 Quantity = sellDto.Quantity,
@@ -81,7 +81,7 @@ public class SellService(AppDbContext context, MovementService movementService) 
     {
         var movementDto = new UpdateMovementDto()
         {
-            WarehouseId = sellDto.WarehouseId,
+            InventoryId = sellDto.InventoryId,
             ProductId = sellDto.ProductId,
             Description = sellDto.Description,
             Quantity = sellDto.Quantity,
@@ -145,7 +145,7 @@ public class SellService(AppDbContext context, MovementService movementService) 
             .Include(s => s.Movement)
             .ThenInclude(m => m.Product)
             .Include(s => s.Movement)
-            .ThenInclude(m => m.Warehouse)
+            .ThenInclude(m => m.Inventory)
             .Where(s => s.Movement.MovementDate >= startDate && s.Movement.MovementDate <= endDate)
             .OrderByDescending(s => s.Movement.MovementDate)
             .ToListAsync();

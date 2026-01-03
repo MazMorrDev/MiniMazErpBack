@@ -14,7 +14,7 @@ public class InventoryService(AppDbContext context) : IInventoryService
 
             var inventory = new Inventory()
             {
-                WarehouseId = inventoryDto.WarehouseId,
+                ClientId = inventoryDto.ClientId,
                 ProductId = inventoryDto.ProductId,
                 Stock = inventoryDto.Stock,
                 AlertStock = inventoryDto.AlertStock,
@@ -78,7 +78,7 @@ public class InventoryService(AppDbContext context) : IInventoryService
             var inventory = await _context.Inventories.FindAsync(id);
             ArgumentNullException.ThrowIfNull(inventory);
 
-            inventory.WarehouseId = inventoryDto.WarehouseId;
+            inventory.ClientId = inventoryDto.ClientId;
             inventory.ProductId = inventoryDto.ProductId;
             inventory.Stock = inventoryDto.Stock;
             inventory.AlertStock = inventoryDto.AlertStock;

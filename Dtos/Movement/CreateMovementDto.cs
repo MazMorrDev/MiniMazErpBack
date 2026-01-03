@@ -5,7 +5,7 @@ namespace MiniMazErpBack;
 public record class CreateMovementDto
 {
     [Required]
-    public int WarehouseId { get; init; }
+    public int InventoryId { get; init; }
 
     [Required]
     public int ProductId { get; init; }

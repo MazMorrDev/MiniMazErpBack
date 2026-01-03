@@ -22,7 +22,6 @@ public class WebAppBuilderConfig
         builder.Services.AddScoped<MovementService>();
         builder.Services.AddScoped<ProductService>();
         builder.Services.AddScoped<SellService>();
-        builder.Services.AddScoped<WarehouseService>();
         builder.Services.AddControllers();
 
         // 1. Agregar servicios de autenticación

@@ -10,9 +10,9 @@ public class MovementService(AppDbContext context) : IMovementService
     {
         try
         {
-            // Validar que Warehouse existe
-            var warehouseExists = await _context.Warehouses.AnyAsync(w => w.ClientId == movementDto.WarehouseId);
-            if (!warehouseExists) throw new ArgumentException($"Warehouse con ID {movementDto.WarehouseId} no existe");
+            // Validar que Inventory existe
+            var inventoryExists = await _context.Inventories.AnyAsync(i => i.Id == movementDto.InventoryId);
+            if (!inventoryExists) throw new ArgumentException($"Inventory con ID {movementDto.InventoryId} no existe");
 
             // Validar que Product existe
             var productExists = await _context.Products.AnyAsync(p => p.Id == movementDto.ProductId);
@@ -23,7 +23,7 @@ public class MovementService(AppDbContext context) : IMovementService
 
             var movement = new Movement()
             {
-                WarehouseId = movementDto.WarehouseId,
+                InventoryId = movementDto.InventoryId,
                 ProductId = movementDto.ProductId,
                 Description = movementDto.Description,
                 Quantity = movementDto.Quantity,
@@ -34,7 +34,7 @@ public class MovementService(AppDbContext context) : IMovementService
             await _context.SaveChangesAsync();
 
             // Cargar relaciones para retornar objeto completo
-            await _context.Entry(movement).Reference(m => m.Warehouse).LoadAsync();
+            await _context.Entry(movement).Reference(m => m.Inventory).LoadAsync();
             await _context.Entry(movement).Reference(m => m.Product).LoadAsync();
 
             return movement;
@@ -81,7 +81,7 @@ public class MovementService(AppDbContext context) : IMovementService
         try
         {
             return await _context.Movements
-                .Include(m => m.Warehouse)
+                .Include(m => m.Inventory)
                 .Include(m => m.Product)
                 .OrderByDescending(m => m.MovementDate)
                 .ThenByDescending(m => m.Id)
@@ -99,7 +99,7 @@ public class MovementService(AppDbContext context) : IMovementService
         try
         {
             return await _context.Movements
-                .Include(m => m.Warehouse)
+                .Include(m => m.Inventory)
                 .Include(m => m.Product)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
@@ -116,7 +116,7 @@ public class MovementService(AppDbContext context) : IMovementService
             var movement = await _context.Movements.FindAsync(id);
             if (movement == null) return false;
 
-            movement.WarehouseId = movementDto.WarehouseId;
+            movement.InventoryId = movementDto.InventoryId;
             movement.ProductId = movementDto.ProductId;
             movement.Description = movementDto.Description;
             movement.Quantity = movementDto.Quantity;

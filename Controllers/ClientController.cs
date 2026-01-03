@@ -1,19 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using DotNetEnv;
 
 namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController(ClientService service, ILogger<ClientController> logger, IConfiguration configuration) : ControllerBase
+public class ClientController(ClientService service, ILogger<ClientController> logger) : ControllerBase
 {
     private readonly ClientService _service = service;
     private readonly ILogger _logger = logger;
-    private readonly IConfiguration _configuration = configuration;
 
     [HttpPost]
     public async Task<IActionResult> RegisterClient([FromBody] RegisterClientDto clientDto)
@@ -40,7 +34,7 @@ public class ClientController(ClientService service, ILogger<ClientController> l
             if (client == null)
                 return Unauthorized(new { message = "Invalid credentials" }); // 401
 
-            var token = GenerateJwtToken(client);
+            var token = _service.GenerateJwtToken(client);
 
             return Ok(new
             {
@@ -60,26 +54,5 @@ public class ClientController(ClientService service, ILogger<ClientController> l
         }
     }
 
-    private string GenerateJwtToken(Client client)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "fallback_key_32_chars_long_123456");
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
-                new Claim(ClaimTypes.Name, client.Name),
-            ]),
-
-            Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(Environment.GetEnvironmentVariable("JWT_EXPIRE_HOURS") ?? "24")),
-            Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "MiniMazErpBack",
-            Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "MiniMazErpFront",
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
-    }
 }
