@@ -38,9 +38,8 @@ public class ClientController(ClientService service, ILogger<ClientController> l
             var client = await _service.LoginClient(clientDto);
 
             if (client == null)
-                return Unauthorized(new { message = "Invalid credentials" }); // ✅ 401
+                return Unauthorized(new { message = "Invalid credentials" }); // 401
 
-            // ✅ Generar token JWT (esto es lo que falta)
             var token = GenerateJwtToken(client);
 
             return Ok(new
