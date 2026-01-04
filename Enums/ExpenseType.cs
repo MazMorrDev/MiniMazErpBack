@@ -2,5 +2,5 @@
 
 public enum ExpenseType
 {
-    // TODO add enums to this
+    RENT, UTILITIES, SALARIES, MAINTENANCE, OTHER
 }
