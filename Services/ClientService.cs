@@ -13,8 +13,7 @@ public class ClientService(AppDbContext context) : IClientService
 
     public async Task<Client> RegisterClient(RegisterClientDto clientDto)
     {
-        try
-        {
+
             if (string.IsNullOrWhiteSpace(clientDto.Name)) throw new ArgumentException("Name is required", nameof(clientDto));
             if (string.IsNullOrWhiteSpace(clientDto.Password)) throw new ArgumentException("Password is required", nameof(clientDto));
 
@@ -29,17 +28,11 @@ public class ClientService(AppDbContext context) : IClientService
             await _context.Clients.AddAsync(client);
             await _context.SaveChangesAsync();
             return client;
-        }
-        catch (Exception)
-        {
-            throw;
-        }
     }
 
     public async Task<Client?> LoginClient(LoginClientDto clientDto)
     {
-        try
-        {
+
             if (string.IsNullOrWhiteSpace(clientDto.Name)) throw new ArgumentException("Name is required", nameof(clientDto));
             if (string.IsNullOrWhiteSpace(clientDto.Password)) throw new ArgumentException("Password is required", nameof(clientDto));
 
@@ -50,11 +43,7 @@ public class ClientService(AppDbContext context) : IClientService
 
             // Si devuelve null es porq no metió la contraseña correcta o el nombre de cliente no exite
             return isPasswordValid ? client : null;
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+ 
     }
 
     public string GenerateJwtToken(Client client)

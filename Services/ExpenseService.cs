@@ -9,61 +9,51 @@ public class ExpenseService(AppDbContext context, MovementService movementServic
 
     public async Task<Expense> CreateExpenseAsync(CreateExpenseDto expenseDto)
     {
-        try
+
+        // Crear el Movement
+        var movementDto = new CreateMovementDto()
         {
-            // Crear el Movement
-            var movementDto = new CreateMovementDto()
-            {
-                InventoryId = expenseDto.InventoryId,
-                ProductId = expenseDto.ProductId,
-                Description = expenseDto.Description,
-                Quantity = expenseDto.Quantity,
-                MovementDate = expenseDto.MovementDate
-            };
+            InventoryId = expenseDto.InventoryId,
+            ProductId = expenseDto.ProductId,
+            Description = expenseDto.Description,
+            Quantity = expenseDto.Quantity,
+            MovementDate = expenseDto.MovementDate
+        };
 
-            var newMovement = await _movementService.CreateMovementAsync(movementDto);
+        var newMovement = await _movementService.CreateMovementAsync(movementDto);
 
-            // Crear el nuevo Expense
-            var expense = new Expense()
-            {
-                MovementId = newMovement.Id,
-                Movement = newMovement,
-                ExpenseType = expenseDto.ExpenseType,
-                TotalPrice = expenseDto.TotalPrice
-            };
-
-            await _context.Expenses.AddAsync(expense);
-            await _context.SaveChangesAsync();
-            return expense;
-        }
-        catch (Exception)
+        // Crear el nuevo Expense
+        var expense = new Expense()
         {
-            throw;
-        }
+            MovementId = newMovement.Id,
+            Movement = newMovement,
+            ExpenseType = expenseDto.ExpenseType,
+            TotalPrice = expenseDto.TotalPrice
+        };
+
+        await _context.Expenses.AddAsync(expense);
+        await _context.SaveChangesAsync();
+        return expense;
+
     }
 
     public async Task<bool> DeleteExpenseAsync(int id)
     {
-        try
-        {
-            var expense = await _context.Expenses
-                .Include(e => e.Movement)
-                .FirstOrDefaultAsync(e => e.MovementId == id);
 
-            if (expense == null) return false;
+        var expense = await _context.Expenses
+            .Include(e => e.Movement)
+            .FirstOrDefaultAsync(e => e.MovementId == id);
 
-            var movement = expense.Movement;
+        if (expense == null) return false;
 
-            _context.Expenses.Remove(expense);
-            _context.Movements.Remove(movement);
+        var movement = expense.Movement;
 
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        _context.Expenses.Remove(expense);
+        _context.Movements.Remove(movement);
+
+        await _context.SaveChangesAsync();
+        return true;
+
     }
 
     public async Task<IEnumerable<Expense>> GetAllExpensesAsync()
@@ -104,16 +94,9 @@ public class ExpenseService(AppDbContext context, MovementService movementServic
     // Método adicional: Obtener Expense completo con Movement cargado
     public async Task<Expense?> GetFullExpenseByIdAsync(int id)
     {
-        try
-        {
-            return await _context.Expenses
-                .Include(e => e.Movement)
-                .FirstOrDefaultAsync(e => e.MovementId == id);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        return await _context.Expenses
+            .Include(e => e.Movement)
+            .FirstOrDefaultAsync(e => e.MovementId == id);
     }
 
     // Método para verificar si existe un expense

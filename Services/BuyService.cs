@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 
 namespace MiniMazErpBack;
 
@@ -9,62 +10,48 @@ public class BuyService(AppDbContext context, MovementService movementService) :
 
     public async Task<Buy> CreateBuyAsync(CreateBuyDto buyDto)
     {
-        try
+
+        // Crear el Movement
+        var movementDto = new CreateMovementDto()
         {
-            // Crear el Movement
-            var movementDto = new CreateMovementDto()
-            {
-                InventoryId = buyDto.InventoryId,
-                ProductId = buyDto.ProductId,
-                Description = buyDto.Description,
-                Quantity = buyDto.Quantity,
-                MovementDate = buyDto.MovementDate
-            };
+            InventoryId = buyDto.InventoryId,
+            ProductId = buyDto.ProductId,
+            Description = buyDto.Description,
+            Quantity = buyDto.Quantity,
+            MovementDate = buyDto.MovementDate
+        };
 
-            var newMovement = await _movementService.CreateMovementAsync(movementDto);
+        var newMovement = await _movementService.CreateMovementAsync(movementDto);
 
-            // Crear el nuevo Buy
-            var buy = new Buy()
-            {
-                MovementId = newMovement.Id,
-                Movement = newMovement,
-                UnitPrice = buyDto.UnitPrice
-            };
-
-            await _context.Buys.AddAsync(buy);
-
-            await _context.SaveChangesAsync();
-            return buy;
-        }
-        catch (Exception)
+        // Crear el nuevo Buy
+        var buy = new Buy()
         {
-            throw;
-        }
+            MovementId = newMovement.Id,
+            Movement = newMovement,
+            UnitPrice = buyDto.UnitPrice
+        };
+
+        await _context.Buys.AddAsync(buy);
+
+        await _context.SaveChangesAsync();
+        return buy;
     }
 
     public async Task<bool> DeleteBuyAsync(int id)
     {
-        try
-        {
-            var buy = await _context.Buys
-                .Include(b => b.Movement)
-                .FirstOrDefaultAsync(b => b.MovementId == id);
+        var buy = await _context.Buys
+            .Include(b => b.Movement)
+            .FirstOrDefaultAsync(b => b.MovementId == id);
 
-            if (buy == null) return false;
+        if (buy == null) return false;
 
-            var movement = buy.Movement;
+        var movement = buy.Movement;
 
-            _context.Buys.Remove(buy);
-            _context.Movements.Remove(movement);
+        _context.Buys.Remove(buy);
+        _context.Movements.Remove(movement);
 
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<IEnumerable<Buy>> GetAllBuysAsync()
@@ -103,16 +90,9 @@ public class BuyService(AppDbContext context, MovementService movementService) :
     // Método adicional: Obtener Buy completo con Movement cargado
     public async Task<Buy?> GetFullBuyByIdAsync(int id)
     {
-        try
-        {
-            return await _context.Buys
-                .Include(b => b.Movement)
-                .FirstOrDefaultAsync(b => b.MovementId == id);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        return await _context.Buys
+            .Include(b => b.Movement)
+            .FirstOrDefaultAsync(b => b.MovementId == id);
     }
 
     // NUEVO: Método para verificar si existe una compra
@@ -124,17 +104,10 @@ public class BuyService(AppDbContext context, MovementService movementService) :
     // NUEVO: Método para obtener compras por producto
     public async Task<IEnumerable<Buy>> GetBuysByProductIdAsync(int productId)
     {
-        try
-        {
-            return await _context.Buys
-                .Include(b => b.Movement)
-                .Where(b => b.Movement != null && b.Movement.ProductId == productId)
-                .ToListAsync();
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        return await _context.Buys
+            .Include(b => b.Movement)
+            .Where(b => b.Movement != null && b.Movement.ProductId == productId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<Buy>> GetBuysByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
