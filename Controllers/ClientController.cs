@@ -9,7 +9,7 @@ public class ClientController(ClientService service, ILogger<ClientController> l
     private readonly ClientService _service = service;
     private readonly ILogger _logger = logger;
 
-    [HttpPost]
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterClient([FromBody] RegisterClientDto clientDto)
     {
         try
