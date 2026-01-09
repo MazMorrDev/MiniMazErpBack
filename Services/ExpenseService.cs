@@ -14,7 +14,6 @@ public class ExpenseService(AppDbContext context, MovementService movementServic
         var movementDto = new CreateMovementDto()
         {
             InventoryId = expenseDto.InventoryId,
-            ProductId = expenseDto.ProductId,
             Description = expenseDto.Description,
             Quantity = expenseDto.Quantity,
             MovementDate = expenseDto.MovementDate
@@ -71,7 +70,6 @@ public class ExpenseService(AppDbContext context, MovementService movementServic
         var movementDto = new UpdateMovementDto()
         {
             InventoryId = expenseDto.InventoryId,
-            ProductId = expenseDto.ProductId,
             Description = expenseDto.Description,
             Quantity = expenseDto.Quantity,
             MovementDate = expenseDto.MovementDate
@@ -125,9 +123,6 @@ public class ExpenseService(AppDbContext context, MovementService movementServic
     {
         return await _context.Expenses
             .Include(e => e.Movement)
-            .ThenInclude(m => m.Product)
-            .Include(e => e.Movement)
-            .ThenInclude(i => i.Inventory)
             .Where(e => e.Movement.MovementDate >= startDate && e.Movement.MovementDate <= endDate)
             .OrderByDescending(e => e.Movement.MovementDate)
             .ToListAsync();
