@@ -16,7 +16,6 @@ public class SellService(AppDbContext context, MovementService movementService) 
             var movementDto = new CreateMovementDto()
             {
                 InventoryId = sellDto.InventoryId,
-                ProductId = sellDto.ProductId,
                 Description = sellDto.Description,
                 Quantity = sellDto.Quantity,
                 MovementDate = sellDto.MovementDate
@@ -82,7 +81,6 @@ public class SellService(AppDbContext context, MovementService movementService) 
         var movementDto = new UpdateMovementDto()
         {
             InventoryId = sellDto.InventoryId,
-            ProductId = sellDto.ProductId,
             Description = sellDto.Description,
             Quantity = sellDto.Quantity,
             MovementDate = sellDto.MovementDate
@@ -130,7 +128,7 @@ public class SellService(AppDbContext context, MovementService movementService) 
         {
             return await _context.Sells
                 .Include(s => s.Movement)
-                .Where(s => s.Movement != null && s.Movement.ProductId == productId)
+                .Where(s => s.Movement != null && s.Movement.Inventory.ProductId == productId)
                 .ToListAsync();
         }
         catch (Exception)
@@ -142,8 +140,6 @@ public class SellService(AppDbContext context, MovementService movementService) 
     public async Task<IEnumerable<Sell>> GetSellsByDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
     {
         return await _context.Sells
-            .Include(s => s.Movement)
-            .ThenInclude(m => m.Product)
             .Include(s => s.Movement)
             .ThenInclude(m => m.Inventory)
             .Where(s => s.Movement.MovementDate >= startDate && s.Movement.MovementDate <= endDate)
