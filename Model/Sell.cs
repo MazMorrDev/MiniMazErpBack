@@ -12,7 +12,7 @@ public class Sell
 
     [Column("discount_percentage", TypeName = "decimal(5,2)")]
     [Range(0, 100, ErrorMessage = "El descuento debe estar entre 0 y 100%")]
-    public decimal DiscountPercentage { get; set; }
+    public decimal? DiscountPercentage { get; set; }
 
     // Navigation Property
     [ForeignKey("MovementId")]
