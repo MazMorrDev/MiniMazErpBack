@@ -13,9 +13,6 @@ public class Movement
     [Required, Column("inventory_id")]
     public int InventoryId { get; set; }
 
-    [Required, Column("product_id")]
-    public int ProductId { get; set; }
-
     [Column("description"), MaxLength(225)]
     public string? Description { get; set; }
 
@@ -27,9 +24,5 @@ public class Movement
 
     [ForeignKey("InventoryId")]
     public virtual Inventory Inventory { get; set; } = null!;
-
-    [ForeignKey("ProductId")]
-    public virtual Product Product { get; set; } = null!;
-
 }
 
