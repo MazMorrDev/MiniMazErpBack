@@ -50,9 +50,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             // Índice para consultas por fecha: Acelera búsquedas de movimientos en rangos de fechas
             // Ej: "Movimientos del último mes", "Reporte mensual"
             entity.HasIndex(e => e.MovementDate);
-
-            // Índice para consultas por producto: Optimiza búsquedas del historial de un producto específico
-            entity.HasIndex(e => e.ProductId);
         });
 
         // SELL - Configuración de venta
