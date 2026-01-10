@@ -16,9 +16,7 @@ public class InventoryService(AppDbContext context) : IInventoryService
             {
                 ClientId = inventoryDto.ClientId,
                 ProductId = inventoryDto.ProductId,
-                Stock = inventoryDto.Stock,
-                AlertStock = inventoryDto.AlertStock,
-                WarningStock = inventoryDto.WarningStock
+                Stock = inventoryDto.Stock
             };
             await _context.Inventories.AddAsync(inventory);
             await _context.SaveChangesAsync();
@@ -81,8 +79,6 @@ public class InventoryService(AppDbContext context) : IInventoryService
             inventory.ClientId = inventoryDto.ClientId;
             inventory.ProductId = inventoryDto.ProductId;
             inventory.Stock = inventoryDto.Stock;
-            inventory.AlertStock = inventoryDto.AlertStock;
-            inventory.WarningStock = inventoryDto.WarningStock;
 
             await _context.SaveChangesAsync();
             return true;

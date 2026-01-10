@@ -10,6 +10,4 @@ public record class CreateInventoryDto
     public required int ProductId { get; init; }
     [Required]
     public required int Stock { get; init; }
-    public int? AlertStock { get; init; }
-    public int? WarningStock { get; init; }
 }

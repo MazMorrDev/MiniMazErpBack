@@ -19,17 +19,6 @@ public class Inventory
     [Required, Column("stock")]
     public int Stock { get; set; }
 
-    // // Lógica para alertas
-    // public bool IsBelowAlertStock => AlertStock.HasValue && Stock < AlertStock.Value;
-
-    // public bool IsBelowWarningStock => WarningStock.HasValue && Stock < WarningStock.Value;
-
-    [Column("alert_stock")]
-    public int? AlertStock { get; set; }
-
-    [Column("warning_stock")]
-    public int? WarningStock { get; set; }
-
     // Navigation Properties
     [ForeignKey("ClientId")]
     public virtual Client Client { get; set; } = null!;
