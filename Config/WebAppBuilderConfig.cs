@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json.Serialization;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,11 @@ public class WebAppBuilderConfig
         builder.Services.AddScoped<MovementService>();
         builder.Services.AddScoped<ProductService>();
         builder.Services.AddScoped<SellService>();
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        });
 
         // 1. Agregar servicios de autenticación
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
