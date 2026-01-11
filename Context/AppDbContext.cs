@@ -10,7 +10,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Movement> Movements { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Sell> Sells { get; set; }
-    public DbSet<Expense> Expenses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,19 +69,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             // Misma precisión que Product.SellPrice para consistencia en precios
             entity.Property(e => e.UnitPrice).HasPrecision(18, 4);
-        });
-
-        // EXPENSE - Configuración de gasto
-        modelBuilder.Entity<Expense>(entity =>
-        {
-            // Precisión consistente con otros valores monetarios
-            entity.Property(e => e.TotalPrice).HasPrecision(18, 4);
-
-            // Convertir enum a string para almacenamiento en BD
-            // HasMaxLength(20) limita el tamaño y mejora performance de índices
-            entity.Property(e => e.ExpenseType)
-                .HasConversion<string>()
-                .HasMaxLength(20);
         });
 
         // WAREHOUSE - Configuración de almacén
