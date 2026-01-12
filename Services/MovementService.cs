@@ -131,9 +131,8 @@ public class MovementService(AppDbContext context) : IMovementService
             // Consulta optimizada - solo verifica existencia, no carga datos
             var hasBuy = await _context.Buys.AnyAsync(b => b.MovementId == movementId);
             var hasSell = await _context.Sells.AnyAsync(s => s.MovementId == movementId);
-            var hasExpense = await _context.Expenses.AnyAsync(e => e.MovementId == movementId);
 
-            return hasBuy || hasSell || hasExpense;
+            return hasBuy || hasSell;
         }
         catch (Exception)
         {

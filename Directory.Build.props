@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateGlobalUsings>false</GenerateGlobalUsings>
+  </PropertyGroup>
+</Project>
