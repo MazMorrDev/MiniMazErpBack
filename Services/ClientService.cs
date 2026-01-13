@@ -46,26 +46,26 @@ public class ClientService(AppDbContext context) : IClientService
  
     }
 
-    public string GenerateJwtToken(Client client)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "fallback_key_32_chars_long_123456");
+    // public string GenerateJwtToken(Client client)
+    // {
+    //     var tokenHandler = new JwtSecurityTokenHandler();
+    //     var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "fallback_key_32_chars_long_123456");
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
-                new Claim(ClaimTypes.Name, client.Name),
-            ]),
+    //     var tokenDescriptor = new SecurityTokenDescriptor
+    //     {
+    //         Subject = new ClaimsIdentity(
+    //         [
+    //             new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
+    //             new Claim(ClaimTypes.Name, client.Name),
+    //         ]),
 
-            Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(Environment.GetEnvironmentVariable("JWT_EXPIRE_HOURS") ?? "24")),
-            Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "MiniMazErpBack",
-            Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "MiniMazErpFront",
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
+    //         Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(Environment.GetEnvironmentVariable("JWT_EXPIRE_HOURS") ?? "24")),
+    //         Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "MiniMazErpBack",
+    //         Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "MiniMazErpFront",
+    //         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+    //     };
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
-    }
+    //     var token = tokenHandler.CreateToken(tokenDescriptor);
+    //     return tokenHandler.WriteToken(token);
+    // }
 }

@@ -4,9 +4,10 @@ namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController(ClientService service, ILogger<ClientController> logger) : ControllerBase
+public class ClientController(IClientService clientService, JwtService jwtService, ILogger<ClientController> logger) : ControllerBase
 {
-    private readonly ClientService _service = service;
+    private readonly IClientService _clientService = clientService;
+    private readonly JwtService _jwtService = jwtService;
     private readonly ILogger _logger = logger;
 
     [HttpPost("register")]
@@ -14,7 +15,7 @@ public class ClientController(ClientService service, ILogger<ClientController> l
     {
         try
         {
-            return Ok(await _service.RegisterClient(clientDto));
+            return Ok(await _clientService.RegisterClient(clientDto));
         }
         catch (Exception ex)
         {
@@ -29,12 +30,12 @@ public class ClientController(ClientService service, ILogger<ClientController> l
 
         try
         {
-            var client = await _service.LoginClient(clientDto);
+            var client = await _clientService.LoginClient(clientDto);
 
             if (client == null)
                 return Unauthorized(new { message = "Invalid credentials" }); // 401
 
-            var token = _service.GenerateJwtToken(client);
+            var token = _jwtService.GenerateJwtToken(client);
 
             return Ok(new
             {
