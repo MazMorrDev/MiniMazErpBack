@@ -23,6 +23,7 @@ public class WebAppBuilderConfig
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ISellService, SellService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddLogging();
         builder.Services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
