@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MiniMazErpBack;
 
-public class JwtService
+public class JwtService : IJwtService
 {
     public string GenerateJwtToken(Client client)
     {

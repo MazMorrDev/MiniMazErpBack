@@ -16,12 +16,13 @@ public class WebAppBuilderConfig
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi("v1"); // Customize the document name
         builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
-        builder.Services.AddScoped<BuyService>();
-        builder.Services.AddScoped<ClientService>();
-        builder.Services.AddScoped<InventoryService>();
-        builder.Services.AddScoped<MovementService>();
-        builder.Services.AddScoped<ProductService>();
-        builder.Services.AddScoped<SellService>();
+        builder.Services.AddScoped<IBuyService, BuyService>();
+        builder.Services.AddScoped<IClientService, ClientService>();
+        builder.Services.AddScoped<IInventoryService, InventoryService>();
+        builder.Services.AddScoped<IMovementService, MovementService>();
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<ISellService, SellService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;

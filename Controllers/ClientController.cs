@@ -4,10 +4,10 @@ namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController(IClientService clientService, JwtService jwtService, ILogger<ClientController> logger) : ControllerBase
+public class ClientController(IClientService clientService, IJwtService jwtService, ILogger<ClientController> logger) : ControllerBase
 {
     private readonly IClientService _clientService = clientService;
-    private readonly JwtService _jwtService = jwtService;
+    private readonly IJwtService _jwtService = jwtService;
     private readonly ILogger _logger = logger;
 
     [HttpPost("register")]
@@ -54,6 +54,4 @@ public class ClientController(IClientService clientService, JwtService jwtServic
             return StatusCode(500, new { error = "Internal server error" });
         }
     }
-
-
 }

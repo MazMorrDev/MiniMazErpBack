@@ -7,9 +7,10 @@ using DotNetEnv;
 
 namespace MiniMazErpBack;
 
-public class ClientService(AppDbContext context) : IClientService
+public class ClientService(AppDbContext context, ILogger<ClientService> logger) : IClientService
 {
     private readonly AppDbContext _context = context;
+    private readonly ILogger<ClientService> _logger = logger;
 
     public async Task<Client> RegisterClient(RegisterClientDto clientDto)
     {
