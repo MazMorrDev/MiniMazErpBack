@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniMazErpBack;
 
-[Table("Client")]
-public class Client
+[Table("User")]
+public class User
 {
     [Key, Column("id")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -17,7 +17,7 @@ public class WebAppBuilderConfig
         builder.Services.AddOpenApi("v1"); // Customize the document name
         builder.Services.AddDbContext<AppDbContext>(optionsAction: options => options.UseNpgsql(connectionString));
         builder.Services.AddScoped<IBuyService, BuyService>();
-        builder.Services.AddScoped<IClientService, ClientService>();
+        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IInventoryService, InventoryService>();
         builder.Services.AddScoped<IMovementService, MovementService>();
         builder.Services.AddScoped<IProductService, ProductService>();

@@ -4,7 +4,7 @@ namespace MiniMazErpBack;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<Client> Clients { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<Buy> Buys { get; set; }
     public DbSet<Inventory> Inventories { get; set; }
     public DbSet<Movement> Movements { get; set; }
@@ -28,7 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             // Índice único compuesto: Evita tener múltiples registros para la misma combinación
             // de almacén y producto. Un producto solo puede tener un registro de inventario por almacén
-            entity.HasIndex(e => new { e.ClientId, e.ProductId }).IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.ProductId }).IsUnique();
 
             // Check constraint a nivel de tabla: Garantiza que el stock nunca sea negativo
             // Se ejecuta en la base de datos, previniendo datos inválidos incluso desde SQL directo
@@ -72,9 +72,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         });
 
         // WAREHOUSE - Configuración de almacén
-        modelBuilder.Entity<Client>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
-            // Índice único: Evita nombres de clientes duplicados
+            // Índice único: Evita nombres de usuarios duplicados
             // Mejora integridad de datos y búsquedas por nombre
             entity.HasIndex(e => e.Name).IsUnique();
         });

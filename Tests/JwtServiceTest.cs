@@ -6,6 +6,7 @@ namespace MiniMazErpBack.Tests;
 
 public class JwtServiceTests
 {
+    
     [Fact]
     public void GenerateJwtToken_WithValidClient_ReturnsToken()
     {

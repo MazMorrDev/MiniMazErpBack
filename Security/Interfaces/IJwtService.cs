@@ -2,5 +2,5 @@
 
 public interface IJwtService
 {
-    string GenerateJwtToken(Client client);
+    string GenerateJwtToken(User user);
 }

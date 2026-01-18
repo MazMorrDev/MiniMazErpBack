@@ -7,7 +7,7 @@ namespace MiniMazErpBack;
 
 public class JwtService : IJwtService
 {
-    public string GenerateJwtToken(Client client)
+    public string GenerateJwtToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "fallback_key_32_chars_long_123456");
@@ -16,8 +16,8 @@ public class JwtService : IJwtService
         {
             Subject = new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.NameIdentifier, client.Id.ToString()),
-                new Claim(ClaimTypes.Name, client.Name),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
             ]),
 
             Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(Environment.GetEnvironmentVariable("JWT_EXPIRE_HOURS") ?? "24")),

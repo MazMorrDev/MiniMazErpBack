@@ -2,7 +2,7 @@
 
 namespace MiniMazErpBack;
 
-public record class LoginClientDto
+public record class RegisterUserDto
 {
     [Required, MaxLength(20)]
     public required string Name { get; init; }

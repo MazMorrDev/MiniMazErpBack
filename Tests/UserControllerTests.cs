@@ -1,4 +1,3 @@
-// ClientControllerTests.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -6,37 +5,37 @@ using Xunit;
 
 namespace MiniMazErpBack.Tests;
 
-public class ClientControllerTests
+public class UserControllerTests
 {
-    private readonly Mock<IClientService> _mockClientService;
+    private readonly Mock<IUserService> _mockUserService;
     private readonly Mock<IJwtService> _mockJwtService;
-    private readonly Mock<ILogger<ClientController>> _mockLogger;
-    private readonly ClientController _controller;
+    private readonly Mock<ILogger<UserController>> _mockLogger;
+    private readonly UserController _controller;
 
-    public ClientControllerTests()
+    public UserControllerTests()
     {
-        _mockClientService = new Mock<IClientService>();
+        _mockUserService = new Mock<IUserService>();
         _mockJwtService = new Mock<IJwtService>();
-        _mockLogger = new Mock<ILogger<ClientController>>();
+        _mockLogger = new Mock<ILogger<UserController>>();
 
-        _controller = new ClientController(
-            _mockClientService.Object,
+        _controller = new UserController(
+            _mockUserService.Object,
             _mockJwtService.Object,
             _mockLogger.Object
         );
     }
 
     [Fact]
-    public async Task LoginClient_WithValidCredentials_ReturnsTokenAndUser()
+    public async Task LoginUser_WithValidCredentials_ReturnsTokenAndUser()
     {
         // Arrange
-        var loginDto = new LoginClientDto
+        var loginDto = new LoginUserDto
         {
             Name = "testuser",
             Password = "password123"
         };
 
-        var client = new Client
+        var user = new User
         {
             Id = 1,
             Name = "testuser",
@@ -45,16 +44,16 @@ public class ClientControllerTests
 
         var expectedToken = "fake-jwt-token";
 
-        _mockClientService
-            .Setup(service => service.LoginClient(loginDto))
-            .ReturnsAsync(client);
+        _mockUserService
+            .Setup(service => service.LoginUser(loginDto))
+            .ReturnsAsync(user);
 
         _mockJwtService
-            .Setup(service => service.GenerateJwtToken(client))
+            .Setup(service => service.GenerateJwtToken(user))
             .Returns(expectedToken);
 
         // Act
-        var result = await _controller.LoginClient(loginDto);
+        var result = await _controller.LoginUser(loginDto);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -78,21 +77,21 @@ public class ClientControllerTests
     }
 
     [Fact]
-    public async Task LoginClient_WithInvalidCredentials_ReturnsUnauthorized()
+    public async Task LoginUser_WithInvalidCredentials_ReturnsUnauthorized()
     {
         // Arrange
-        var loginDto = new LoginClientDto
+        var loginDto = new LoginUserDto
         {
             Name = "wronguser",
             Password = "wrongpassword"
         };
 
-        _mockClientService
-            .Setup(service => service.LoginClient(loginDto))
-            .ReturnsAsync((Client?)null);
+        _mockUserService
+            .Setup(service => service.LoginUser(loginDto))
+            .ReturnsAsync((User?)null);
 
         // Act
-        var result = await _controller.LoginClient(loginDto);
+        var result = await _controller.LoginUser(loginDto);
 
         // Assert
         var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
@@ -103,10 +102,10 @@ public class ClientControllerTests
     }
 
     [Fact]
-    public async Task LoginClient_WithInvalidModelState_ReturnsBadRequest()
+    public async Task LoginUser_WithInvalidModelState_ReturnsBadRequest()
     {
         // Arrange
-        var loginDto = new LoginClientDto
+        var loginDto = new LoginUserDto
         {
             Name = "", // Invalid - empty name
             Password = "password123"
@@ -115,28 +114,28 @@ public class ClientControllerTests
         _controller.ModelState.AddModelError("Name", "Name is required");
 
         // Act
-        var result = await _controller.LoginClient(loginDto);
+        var result = await _controller.LoginUser(loginDto);
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact]
-    public async Task LoginClient_ThrowsArgumentException_ReturnsBadRequest()
+    public async Task LoginUser_ThrowsArgumentException_ReturnsBadRequest()
     {
         // Arrange
-        var loginDto = new LoginClientDto
+        var loginDto = new LoginUserDto
         {
             Name = "testuser",
             Password = "password123"
         };
 
-        _mockClientService
-            .Setup(service => service.LoginClient(loginDto))
+        _mockUserService
+            .Setup(service => service.LoginUser(loginDto))
             .ThrowsAsync(new ArgumentException("Invalid input"));
 
         // Act
-        var result = await _controller.LoginClient(loginDto);
+        var result = await _controller.LoginUser(loginDto);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -145,21 +144,21 @@ public class ClientControllerTests
     }
 
     [Fact]
-    public async Task LoginClient_ThrowsException_ReturnsInternalServerError()
+    public async Task LoginUser_ThrowsException_ReturnsInternalServerError()
     {
         // Arrange
-        var loginDto = new LoginClientDto
+        var loginDto = new LoginUserDto
         {
             Name = "testuser",
             Password = "password123"
         };
 
-        _mockClientService
-            .Setup(service => service.LoginClient(loginDto))
+        _mockUserService
+            .Setup(service => service.LoginUser(loginDto))
             .ThrowsAsync(new Exception("Database error"));
 
         // Act
-        var result = await _controller.LoginClient(loginDto);
+        var result = await _controller.LoginUser(loginDto);
 
         // Assert
         var statusCodeResult = Assert.IsType<ObjectResult>(result);

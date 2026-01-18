@@ -4,18 +4,18 @@ namespace MiniMazErpBack;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController(IClientService clientService, IJwtService jwtService, ILogger<ClientController> logger) : ControllerBase
+public class UserController(IUserService userService, IJwtService jwtService, ILogger<UserController> logger) : ControllerBase
 {
-    private readonly IClientService _clientService = clientService;
+    private readonly IUserService _userService = userService;
     private readonly IJwtService _jwtService = jwtService;
     private readonly ILogger _logger = logger;
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterClient([FromBody] RegisterClientDto clientDto)
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto userDto)
     {
         try
         {
-            return Ok(await _clientService.RegisterClient(clientDto));
+            return Ok(await _userService.RegisterUser(userDto));
         }
         catch (Exception ex)
         {
@@ -24,24 +24,24 @@ public class ClientController(IClientService clientService, IJwtService jwtServi
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> LoginClient([FromBody] LoginClientDto clientDto)
+    public async Task<IActionResult> LoginUser([FromBody] LoginUserDto userDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         try
         {
-            var client = await _clientService.LoginClient(clientDto);
+            var user = await _userService.LoginUser(userDto);
 
-            if (client == null)
+            if (user == null)
                 return Unauthorized(new { message = "Invalid credentials" }); // 401
 
-            var token = _jwtService.GenerateJwtToken(client);
+            var token = _jwtService.GenerateJwtToken(user);
 
             return Ok(new
             {
                 message = "Login successful",
                 token,
-                user = new { client.Id, client.Name }
+                user = new { user.Id, user.Name }
             });
         }
         catch (ArgumentException ex)
