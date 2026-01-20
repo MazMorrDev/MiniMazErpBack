@@ -6,9 +6,9 @@ namespace MiniMazErpBack;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class InventoryController(InventoryService service) : ControllerBase
+public class InventoryController(IInventoryService service) : ControllerBase
 {
-    private readonly InventoryService _service = service;
+    private readonly IInventoryService _service = service;
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateInventoryDto inventoryDto)

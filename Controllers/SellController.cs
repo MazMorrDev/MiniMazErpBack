@@ -6,9 +6,9 @@ namespace MiniMazErpBack.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class SellController(SellService sellService) : ControllerBase
+public class SellController(ISellService sellService) : ControllerBase
 {
-    private readonly SellService _sellService = sellService;
+    private readonly ISellService _sellService = sellService;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Sell>>> GetAll()

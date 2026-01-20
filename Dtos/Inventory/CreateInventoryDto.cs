@@ -5,7 +5,7 @@ namespace MiniMazErpBack;
 public record class CreateInventoryDto
 {
     [Required]
-    public required int ClientId { get; init; }
+    public required int UserId { get; init; }
     [Required]
     public required int ProductId { get; init; }
     [Required]

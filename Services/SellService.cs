@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MiniMazErpBack;
 
-public class SellService(AppDbContext context, MovementService movementService) : ISellService
+public class SellService(AppDbContext context, IMovementService movementService) : ISellService
 {
     private readonly AppDbContext _context = context;
-    private readonly MovementService _movementService = movementService;
+    private readonly IMovementService _movementService = movementService;
 
     public async Task<Sell> CreateSellAsync(CreateSellDto sellDto)
     {

@@ -7,7 +7,7 @@ public record class CreateMovementDto
     [Required]
     public int InventoryId { get; init; }
 
-    [ MaxLength(225)]
+    [MaxLength(225)]
     public string? Description { get; init; }
 
     [Required]

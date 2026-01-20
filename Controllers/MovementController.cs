@@ -6,9 +6,9 @@ namespace MiniMazErpBack;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class MovementController(MovementService movementService) : ControllerBase
+public class MovementController(IMovementService movementService) : ControllerBase
 {
-    private readonly MovementService _service = movementService;
+    private readonly IMovementService _service = movementService;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Movement>>> GetAll()
