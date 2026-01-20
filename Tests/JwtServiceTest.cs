@@ -8,15 +8,15 @@ public class JwtServiceTests
 {
     
     [Fact]
-    public void GenerateJwtToken_WithValidClient_ReturnsToken()
+    public void GenerateJwtToken_WithValidUser_ReturnsToken()
     {
         // Arrange
         var jwtService = new JwtService();
-        var client = new Client
+        var user = new User
         {
             Id = 1,
             Name = "testuser",
-            HashedPassword = "dummy_hashed_password"  // AÑADIR ESTA LÍNEA
+            HashedPassword = "dummy_hashed_password"
         };
 
         // Guardar variables originales
@@ -34,7 +34,7 @@ public class JwtServiceTests
         try
         {
             // Act
-            var token = jwtService.GenerateJwtToken(client);
+            var token = jwtService.GenerateJwtToken(user);
 
             // Assert
             Assert.NotNull(token);
@@ -55,7 +55,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public void GenerateJwtToken_WithNullClient_ThrowsException()
+    public void GenerateJwtToken_WithNullUser_ThrowsException()
     {
         // Arrange
         var jwtService = new JwtService();
