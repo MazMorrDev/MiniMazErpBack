@@ -141,27 +141,33 @@ dotnet test
 
 ## 📸 Visual Demonstration
 
-### Architecture Diagram
-
-_(Include system architecture diagram here)_
-
 ### Database Model
 
-![Database Diagram](/Docs/)
+![MER Database Diagram](/Docs/database-diagram.png)
+
+![ER Database Diagram](/Docs/er-diagram.png)
+
+### Use Cases
+
+![Use Cases](/Docs/use-cases-diagram.png)
 
 ### Use Cases Implemented
 
-![Diagrama de Gestión de Inventario](/Docs/diagrama-de-gestión-de-inventario.png)
+![Inventory Management Diagram](/Docs/inventory-management-diagram.png)
 
-![Diagrama de Gestión de Movimientos](/Docs/diagrama-de-gestión-de-movimientos.png)
+![Movement Management Diagram](/Docs/movement-management-diagram.png)
 
-![Diagrama de Inicio de Sesión](/Docs/diagrama-de-inicio-de-sesion.png)
+![Login Management Diagram](/Docs/login-diagram.png)
 
-![Diagrama de Registro de Usuario](/Docs/diagrama-de-registro-de-usuario.png)
+![Signup Management Diagram](/Docs/user-registry-diagram.png)
 
 ### API Tests
 
-_(Include Postman/Thunder Client screenshots here)_
+![Integration Testing 1](integration-testing-1.png)
+
+![Integration Testing 2](integration-testing-2.png)
+
+![Integration Testing 3](integration-testing-3.png)
 
 ## 🎓 Skills Demonstrated
 
