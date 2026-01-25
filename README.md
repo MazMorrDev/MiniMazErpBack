@@ -151,7 +151,7 @@ _(Include PostgreSQL ER diagram here)_
 
 ### Use Cases Implemented
 
-[Diagrama de Gestión de Inventario](/Docs/Diagrama de Actividades de Gestión de Inventario.png)
+![Diagrama de Gestión de Inventario](/Docs/diagrama-de-actividades-de-gestión-de-inventario.png)
 
 https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Gesti%C3%B3n%20de%20Movimientos.drawio.png
 
