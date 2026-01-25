@@ -1,10 +1,13 @@
 # Inventory Management API - Backend Project
 
 ## 📌 Portfolio Project
+
 This is a backend project developed to showcase technical skills in RESTful API development, software architecture, and database management. It's part of my personal portfolio as a .NET developer.
 
 ## 🎯 Project Purpose
+
 Demonstrate competencies in:
+
 - REST API development with .NET Core
 - Implementation of clean, scalable architectures
 - Relational database management with Entity Framework
@@ -14,6 +17,7 @@ Demonstrate competencies in:
 ## 🏗️ Technology Stack
 
 ### Backend
+
 - **.NET 10.0** - Main framework
 - **C# 14.0** - Programming language
 - **ASP.NET Core Web API** - For REST API construction
@@ -24,6 +28,7 @@ Demonstrate competencies in:
 - **XUnit + Moq** - Unit testing
 
 ### Frontend (Complementary Project)
+
 - **Angular 21** - Frontend framework
 - **TypeScript** - JavaScript superset
 - **RxJS** - Reactive programming
@@ -34,6 +39,7 @@ Demonstrate competencies in:
 ## 📊 Technical Features Demonstrated
 
 ### 1. Architecture & Patterns
+
 - **REST Architecture** with clear separation of concerns
 - **Repository Pattern** for data access abstraction
 - **Controller-Service-Repository** for modular organization
@@ -41,24 +47,28 @@ Demonstrate competencies in:
 - **Dependency Injection** with .NET Core
 
 ### 2. Security
+
 - **JWT (JSON Web Tokens)** based authentication
 - **BCrypt** for secure password hashing
 - Custom authorization middleware
 - Input validation on all endpoints
 
 ### 3. Database
+
 - Normalized design with **PostgreSQL**
 - **Entity Framework Core** with migrations
 - Optimized indexes for frequent queries
 - Integrity constraints at database level
 
 ### 4. Code Quality
+
 - Unit tests with **XUnit** and **Moq**
 - SOLID principles applied
 - Clean, maintainable code
 - Endpoint documentation
 
 ## 📁 Project Structure
+
 ```
 InventoryBackend/
 ├── Controllers/          # API REST Controllers
@@ -84,12 +94,14 @@ InventoryBackend/
 ## 🔧 Local Installation
 
 ### Requirements
+
 - Visual Studio 2022 or VS Code
 - .NET SDK 10.0
 - PostgreSQL 16+
 - Git
 
 ### Quick Steps
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/your-username/inventory-backend.git
@@ -109,16 +121,17 @@ dotnet run
 
 ## 📡 Main Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | User registration |
-| POST | `/api/auth/login` | JWT authentication |
-| GET | `/api/products` | List products |
-| POST | `/api/products` | Create product |
-| GET | `/api/inventory` | Check inventory |
-| POST | `/api/movements` | Register movement |
+| Method | Endpoint             | Description        |
+| ------ | -------------------- | ------------------ |
+| POST   | `/api/auth/register` | User registration  |
+| POST   | `/api/auth/login`    | JWT authentication |
+| GET    | `/api/products`      | List products      |
+| POST   | `/api/products`      | Create product     |
+| GET    | `/api/inventory`     | Check inventory    |
+| POST   | `/api/movements`     | Register movement  |
 
 ## 🧪 Testing
+
 ```bash
 # Run unit tests
 dotnet test
@@ -129,20 +142,30 @@ dotnet test
 ## 📸 Visual Demonstration
 
 ### Architecture Diagram
-*(Include system architecture diagram here)*
+
+_(Include system architecture diagram here)_
 
 ### Database Model
-*(Include PostgreSQL ER diagram here)*
+
+_(Include PostgreSQL ER diagram here)_
 
 ### Use Cases Implemented
-*(Include use case diagram here)*
+
+[Diagrama de Gestión de Inventario](/Docs/Diagrama de Actividades de Gestión de Inventario.png)
+
+https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Gesti%C3%B3n%20de%20Movimientos.drawio.png
+
+https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Inicio%20de%20Sesi%C3%B3n.drawio.png
+https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Registro%20de%20usuario.drawio.png
 
 ### API Tests
-*(Include Postman/Thunder Client screenshots here)*
+
+_(Include Postman/Thunder Client screenshots here)_
 
 ## 🎓 Skills Demonstrated
 
 ### Backend Development
+
 - RESTful APIs with ASP.NET Core
 - JWT authentication and authorization
 - Entity Framework Core and migrations
@@ -150,6 +173,7 @@ dotnet test
 - Scalable software architecture
 
 ### Best Practices
+
 - SOLID principles
 - Dependency injection
 - Unit testing
@@ -157,16 +181,20 @@ dotnet test
 - API documentation
 
 ### Basic DevOps
+
 - Environment configuration
 - Database connection management
 - Environment variables
 - Migration scripts
 
 ## 🔄 Frontend Integration
+
 This backend is designed to work with an Angular frontend application that consumes the API through authenticated HTTP requests. Communication is handled via JSON and JWT tokens.
 
 ## 📚 Key Learnings
+
 During this project's development, I reinforced:
+
 - Professional RESTful API design
 - Web application security
 - Database query optimization
@@ -174,9 +202,11 @@ During this project's development, I reinforced:
 - Technical project documentation
 
 ## 📄 License
+
 Educational project - Free for personal and portfolio use.
 
 ## 👤 Contact
+
 **Developer:** Marco Antonio Romero Albanez  
 **Email:** marconchelo12@gmail.com  
 **LinkedIn:** [Marco Antonio Romero Albanez](https://linkedin.com/in/marco-antonio-romero-albanez-2653372b2)  
@@ -184,4 +214,4 @@ Educational project - Free for personal and portfolio use.
 
 ---
 
-*This project is part of my personal portfolio as a .NET developer. All functionalities have been implemented for demonstrative and educational purposes.*
+_This project is part of my personal portfolio as a .NET developer. All functionalities have been implemented for demonstrative and educational purposes._
