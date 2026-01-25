@@ -177,10 +177,10 @@ During this project's development, I reinforced:
 Educational project - Free for personal and portfolio use.
 
 ## 👤 Contact
-**Developer:** [Your Name]  
-**Email:** [your-email@example.com]  
-**LinkedIn:** [your-linkedin]  
-**GitHub:** [your-github]
+**Developer:** Marco Antonio Romero Albanez  
+**Email:** marconchelo12@gmail.com  
+**LinkedIn:** [Marco Antonio Romero Albanez](https://linkedin.com/in/marco-antonio-romero-albanez-2653372b2)  
+**GitHub:** [MazMorrDev](https://github.com/MazMorrDev)
 
 ---
 
