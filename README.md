@@ -147,16 +147,17 @@ _(Include system architecture diagram here)_
 
 ### Database Model
 
-_(Include PostgreSQL ER diagram here)_
+![Database Diagram](/Docs/)
 
 ### Use Cases Implemented
 
 ![Diagrama de Gestión de Inventario](/Docs/diagrama-de-actividades-de-gestión-de-inventario.png)
 
-![Diagrama de Gestión de Movimientos](https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Gesti%C3%B3n%20de%20Movimientos.drawio.png)
+![Diagrama de Gestión de Movimientos](/Docs/diagrama-de-gestión-de-movimientos.png)
 
-https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Inicio%20de%20Sesi%C3%B3n.drawio.png
-https://github.com/MazMorrDev/MiniMazErpBack/blob/main/Docs/Diagrama%20de%20Actividades%20de%20Registro%20de%20usuario.drawio.png
+![Diagrama de Inicio de Sesión](/Docs/diagrama-de-inicio-de-sesion.png)
+
+![Diagrama de Registro de Usuario](/Docs/diagrama-de-registro-de-usuario.png)
 
 ### API Tests
 
