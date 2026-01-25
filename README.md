@@ -151,7 +151,7 @@ _(Include system architecture diagram here)_
 
 ### Use Cases Implemented
 
-![Diagrama de Gestión de Inventario](/Docs/diagrama-de-actividades-de-gestión-de-inventario.png)
+![Diagrama de Gestión de Inventario](/Docs/diagrama-de-gestión-de-inventario.png)
 
 ![Diagrama de Gestión de Movimientos](/Docs/diagrama-de-gestión-de-movimientos.png)
 
